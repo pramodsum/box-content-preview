@@ -12,7 +12,11 @@ import * as docAnnotatorUtil from './doc-annotator-util';
 import { CLASS_HIDDEN, CLASS_ACTIVE } from '../../constants';
 import * as constants from '../annotation-constants';
 import { replacePlaceholders, decodeKeydown } from '../../util';
-import { ICON_HIGHLIGHT, ICON_HIGHLIGHT_COMMENT } from '../../icons/icons';
+import {
+    ICON_HIGHLIGHT,
+    ICON_HIGHLIGHT_COMMENT,
+    ICON_PLACED_ANNOTATION_GREY
+} from '../../icons/icons';
 
 const CLASS_HIGHLIGHT_DIALOG = 'box-preview-highlight-dialog';
 const HIGHLIGHT_DIALOG_HEIGHT = 38;
@@ -77,14 +81,13 @@ class DocHighlightDialog extends AnnotationDialog {
         const pageHeight = pageDimensions.height - PAGE_PADDING_TOP - PAGE_PADDING_BOTTOM;
 
         const [browserX, browserY] = this._getScaledPDFCoordinates(pageDimensions, pageHeight);
-
         pageEl.appendChild(this._element);
 
         const highlightDialogWidth = this._getDialogWidth();
 
         let dialogX = browserX - (highlightDialogWidth / 2); // Center dialog
         // Shorten extra transparent border top if showing comments dialog
-        let dialogY = this._hasComments ? browserY - 10 : browserY;
+        let dialogY = this._hasComments ? browserY - 17 : browserY;
 
         // Only reposition if one side is past page boundary - if both are,
         // just center the dialog and cause scrolling since there is nothing
@@ -195,6 +198,9 @@ class DocHighlightDialog extends AnnotationDialog {
         this._element.innerHTML = `
             <div class="box-preview-annotation-caret"></div>
             <div class="box-preview-annotation-highlight-dialog ${this._hasComments ? CLASS_HIDDEN : ''}">
+                <button class="annotation-thread-number ${annotations.length ? '' : CLASS_HIDDEN}" disabled>
+                    ${ICON_PLACED_ANNOTATION_GREY}
+                </button>
                 <span class="box-preview-annotation-highlight-label ${CLASS_HIDDEN}"></span>
                 <button class="box-preview-btn-plain box-preview-add-highlight-btn"
                     data-type="highlight-btn"
@@ -458,8 +464,7 @@ class DocHighlightDialog extends AnnotationDialog {
     _getScaledPDFCoordinates(pageDimensions, pageHeight) {
         const zoomScale = annotatorUtil.getScale(this._annotatedElement);
 
-        let [x, y] = this._hasComments ? docAnnotatorUtil.getLowerCenterPoint(this._location.quadPoints) :
-            docAnnotatorUtil.getLowerRightCornerOfLastQuadPoint(this._location.quadPoints);
+        let [x, y] = docAnnotatorUtil.getLowerRightCornerOfLastQuadPoint(this._location.quadPoints);
 
         // If needed, scale coordinates comparing current dimensions with saved dimensions
         const dimensionScale = docAnnotatorUtil.getDimensionScale(this._location.dimensions, pageDimensions, zoomScale);

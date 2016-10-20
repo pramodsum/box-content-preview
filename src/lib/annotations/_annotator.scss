@@ -81,7 +81,7 @@ $avatar-color-9: #f22c44;
 }
 
 // scss-lint:disable SelectorDepth
-.box-preview-is-text-highlighted .box-preview-annotation-highlight-dialog .box-preview-btn-plain {
+.box-preview-is-text-highlighted .box-preview-annotation-highlight-dialog .box-preview-btn-plain.box-preview-add-highlight-btn {
     svg {
         fill: $highlight-yellow;
     }
@@ -261,6 +261,10 @@ $avatar-color-9: #f22c44;
     position: absolute;
     width: 24px;
 
+    .annotation-thread-number {
+        height: 22px;
+    }
+
     svg {
         fill: fade-out($box-blue, .35);
         -webkit-transition: fill .5s;
@@ -410,6 +414,37 @@ $avatar-color-9: #f22c44;
     padding-left: 5px;
     padding-right: 5px;
     width: 100%;
+}
+
+.annotation-thread-number svg {
+    fill: fade-out($box-blue, .35);
+    font-size: 9px;
+
+    text {
+        fill: $white;
+    }
+}
+
+.box-preview-annotation-highlight-dialog .annotation-thread-number {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    font-weight: normal;
+    height: auto;
+    margin: 0;
+    outline: none;
+    padding: 0;
+    padding-left: 5px;
+    vertical-align: middle;
+
+    svg {
+        fill: $seesee;
+    }
+}
+
+.annotation-thread-number.box-preview-annotation-thread {
+    cursor: pointer;
+    position: absolute;
 }
 
 //------------------------------------------------------------------------------

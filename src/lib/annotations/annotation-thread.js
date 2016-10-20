@@ -15,7 +15,8 @@ import AnnotationService from './annotation-service';
 import EventEmitter from 'events';
 import * as annotatorUtil from './annotator-util';
 import * as constants from './annotation-constants';
-import { ICON_PLACED_ANNOTATION } from '../icons/icons';
+import { ICON_PLACED_ANNOTATION_GREY, ICON_PLACED_ANNOTATION_CIRCLE } from '../icons/icons';
+
 
 @autobind
 class AnnotationThread extends EventEmitter {
@@ -83,6 +84,14 @@ class AnnotationThread extends EventEmitter {
             }
 
             this._element = null;
+        }
+
+        if (this.threadNumberEl) {
+            if (this.threadNumberEl.parentNode) {
+                this.threadNumberEl.parentNode.removeChild(this.threadNumberEl);
+            }
+
+            this.threadNumberEl = null;
         }
 
         this.emit('threaddeleted');
@@ -162,6 +171,9 @@ class AnnotationThread extends EventEmitter {
 
             // Otherwise, replace temporary annotation with annotation saved to server
             this._annotations[tempIdx] = savedAnnotation;
+
+            this.addThreadNumberIndicator(savedAnnotation);
+            this.assignThreadNumber(savedAnnotation);
 
             if (this._dialog) {
                 this._dialog.removeAnnotation(tempAnnotationID);
@@ -338,6 +350,12 @@ class AnnotationThread extends EventEmitter {
     setupElement() {
         this._element = this._createElement();
         this.bindDOMListeners();
+
+        // Set thread number for annotations in current thread
+        const lastAnnotationIndex = this._annotations.length - 1;
+        if (lastAnnotationIndex >= 0) {
+            this.addThreadNumberIndicator(this._annotations[lastAnnotationIndex]);
+        }
     }
 
     /**
@@ -370,6 +388,12 @@ class AnnotationThread extends EventEmitter {
         this._element.removeEventListener('click', this.showDialog);
         this._element.removeEventListener('mouseover', this.showDialog);
         this._element.removeEventListener('mouseout', this._mouseoutHandler);
+
+        if (this.threadNumberEl) {
+            this.threadNumberEl.removeEventListener('click', this.showDialog);
+            this.threadNumberEl.removeEventListener('mouseover', this.showDialog);
+            this.threadNumberEl.removeEventListener('mouseout', this._mouseoutHandler);
+        }
     }
 
     /**
@@ -429,7 +453,14 @@ class AnnotationThread extends EventEmitter {
         const indicatorEl = document.createElement('button');
         indicatorEl.classList.add('box-preview-point-annotation-btn');
         indicatorEl.setAttribute('data-type', 'annotation-indicator');
-        indicatorEl.innerHTML = ICON_PLACED_ANNOTATION;
+        indicatorEl.innerHTML = ICON_PLACED_ANNOTATION_CIRCLE;
+
+        // Add thread number indicator
+        this.createThreadNumberElement();
+
+        const indicatorSVG = indicatorEl.querySelector('svg');
+        indicatorEl.insertBefore(this.threadNumberEl, indicatorSVG);
+
         return indicatorEl;
     }
 
@@ -461,6 +492,102 @@ class AnnotationThread extends EventEmitter {
         }
 
         this.reset();
+    }
+
+    /**
+     * Adds and positions thread number indicator HTML element to the DOM for
+     * highlight annotations
+     *
+     * @param {Annotation} annotation Annotation
+     * @returns {void}
+     */
+    addThreadNumberIndicator(annotation) {
+        // Plain highlight annotations
+        if (annotatorUtil.isPlainHighlight([annotation])) {
+            this.threadNumberEl = this._dialog.getAnnotationDialog().querySelector('.annotation-thread-number');
+        } else if (annotatorUtil.isHighlightAnnotation(this.type)) {
+            this.createThreadNumberElement();
+            this.threadNumberEl.classList.add('box-preview-annotation-thread');
+            this.positionThreadNumber(this.location.page, this.type);
+        }
+
+        // Show thread number indicator relative to dialog position
+        this.assignThreadNumber(annotation);
+    }
+
+    /**
+     * Creates thread number HTML element and binds appropriate listeners
+     *
+     * @returns {void}
+     */
+    createThreadNumberElement() {
+        this.threadNumberEl = document.createElement('div');
+        this.threadNumberEl.classList.add('annotation-thread-number');
+        this.threadNumberEl.setAttribute('data-type', 'annotation-indicator');
+        this.threadNumberEl.innerHTML = ICON_PLACED_ANNOTATION_GREY;
+
+        this.threadNumberEl.addEventListener('click', this.showDialog);
+        this.threadNumberEl.addEventListener('mouseover', this.showDialog);
+        this.threadNumberEl.addEventListener('mouseout', this._mouseoutHandler);
+    }
+
+    /**
+     * Assigns thread number to thread number SVG element and displays thread
+     * number HTML element
+     *
+     * @param {Annotation} annotation Annotation
+     * @returns {void}
+     */
+    assignThreadNumber(annotation) {
+        if (!this.threadNumberEl || this.threadNumberEl.lastChild.textContent === annotation._thread) {
+            return;
+        }
+
+        this.threadNumberEl.setAttribute('data-thread-number', annotation._thread);
+
+        const threadNumberIconEl = this.threadNumberEl.getElementsByTagName('svg')[0];
+        const threadText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
+        threadText.setAttribute('y', '60%');
+        threadText.setAttribute('x', '50%');
+        threadText.setAttribute('text-anchor', 'middle');
+        threadText.setAttribute('fill', '#000');
+        threadText.textContent = annotation._thread;
+
+        // Only display thread number if it has been populated
+        if (threadText.textContent) {
+            threadNumberIconEl.appendChild(threadText);
+            annotatorUtil.showElement(this.threadNumberEl);
+        }
+    }
+
+    /**
+     * Positions thread number HTML element according to annotation type
+     *
+     * @param {Annotation} annotation Annotation
+     * @returns {void}
+     */
+    positionThreadNumber(page, type) {
+        // Get indicatorEl SVG element
+        const pageEl = this._annotatedElement.querySelector(`[data-page-number="${page}"]`);
+        pageEl.appendChild(this.threadNumberEl);
+
+        // Position & show thread number indicator relative to dialog position
+        const dialogEl = this._dialog.getAnnotationDialog();
+        annotatorUtil.hideElementVisibility(dialogEl);
+        this._dialog.position();
+        let [dialogX, dialogY] = this._dialog.getDialogPosition();
+        annotatorUtil.hideElement(dialogEl);
+        annotatorUtil.showInvisibleElement(dialogEl);
+
+        // Adjust thread number padding by 4 extra pixels for point thread circle icon
+        const THREAD_NUMBER_INDICATOR_TOP_PADDING = annotatorUtil.isHighlightAnnotation(type) ? 17 : 21;
+        const THREAD_NUMBER_INDICATOR_LEFT_PADDING = 129;
+
+        dialogX = Number(dialogX.replace('px', '')) + THREAD_NUMBER_INDICATOR_LEFT_PADDING;
+        dialogY = Number(dialogY.replace('px', '')) - THREAD_NUMBER_INDICATOR_TOP_PADDING;
+        this.threadNumberEl.style.left = `${dialogX}px`;
+        this.threadNumberEl.style.top = `${dialogY}px`;
     }
 
     /**

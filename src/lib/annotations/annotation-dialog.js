@@ -154,6 +154,24 @@ class AnnotationDialog extends EventEmitter {
         }
     }
 
+    /**
+     * Returns annotation dialog HTML element
+     *
+     * @returns {HTMLElement} annotation dialog
+     */
+    getAnnotationDialog() {
+        return this._element;
+    }
+
+    /**
+    * Returns dialog x and y location position
+    *
+    * @returns {[number,number]} [x,y]
+    */
+    getDialogPosition() {
+        return [this._element.style.left, this._element.style.top];
+    }
+
     //--------------------------------------------------------------------------
     // Abstract
     //--------------------------------------------------------------------------

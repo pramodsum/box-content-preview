@@ -43,6 +43,15 @@ class DocHighlightThread extends AnnotationThread {
         } else {
             this.destroy();
         }
+
+        // Destroy thread number indicator
+        if (this.threadNumberEl) {
+            if (this.threadNumberEl.parentNode) {
+                this.threadNumberEl.parentNode.removeChild(this.threadNumberEl);
+            }
+
+            this.threadNumberEl = null;
+        }
     }
 
     /**
@@ -301,6 +310,10 @@ class DocHighlightThread extends AnnotationThread {
             if ((this._annotations[0].text !== '' || this._annotations.length > 1) &&
                 this._type === constants.ANNOTATION_TYPE_HIGHLIGHT) {
                 this._type = constants.ANNOTATION_TYPE_HIGHLIGHT_COMMENT;
+
+                // Add thread number indicator
+                const lastAnnotationIndex = this._annotations.length - 1;
+                this.addThreadNumberIndicator(this._annotations[lastAnnotationIndex]);
             }
         }
     }
@@ -317,7 +330,13 @@ class DocHighlightThread extends AnnotationThread {
      * @returns {void}
      * @protected
      */
-    setupElement() {}
+    setupElement() {
+        // Set thread number for annotations in current thread
+        const lastAnnotationIndex = this._annotations.length - 1;
+        if (lastAnnotationIndex >= 0) {
+            this.addThreadNumberIndicator(this._annotations[lastAnnotationIndex]);
+        }
+    }
 
     /**
      * Binds custom event listeners for the dialog.
