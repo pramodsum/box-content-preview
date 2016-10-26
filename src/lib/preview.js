@@ -645,7 +645,7 @@ class Preview extends EventEmitter {
             }
         }
 
-        if (checkPermission(this.file, PERMISSION_ANNOTATE) && !Browser.isMobile()) {
+        if (this.viewer.annotator || (checkPermission(this.file, PERMISSION_ANNOTATE) && !Browser.isMobile())) {
             if (checkFeature(this.viewer, 'isAnnotatable', 'point')) {
                 showAnnotateButton(this.viewer.getPointModeClickHandler());
             }

@@ -1,4 +1,7 @@
 import autobind from 'autobind-decorator';
+import AnnotationService from '../../annotations/annotation-service';
+import MediaAnnotator from '../../annotations/media/media-annotator';
+import Browser from '../../browser';
 import MediaBase from './media-base';
 import throttle from 'lodash.throttle';
 import { CLASS_HIDDEN, CLASS_PREVIEW_LOADED } from '../../constants';
@@ -28,6 +31,8 @@ class VideoBase extends MediaBase {
         this.playButtonEl.classList.add(CLASS_PLAY_BUTTON);
         this.playButtonEl.classList.add(CLASS_HIDDEN);
         this.playButtonEl.innerHTML = PLAY_ICON;
+
+        this.initAnnotations();
     }
 
     /**
@@ -175,6 +180,84 @@ class VideoBase extends MediaBase {
      */
     allowNavigationArrows() {
         return !this.mediaControls || !this.mediaControls.isSettingsVisible();
+    }
+
+    // Annotations methods
+
+
+    /**
+     * Initializes annotations.
+     *
+     * @returns {void}
+     * @private
+     */
+    initAnnotations() {
+        // Users can currently only view annotations on mobile
+        const canAnnotate = !!true && !Browser.isMobile();
+        this.canAnnotate = canAnnotate;
+
+        const fileVersionID = this.options.file.file_version.id;
+        const annotationService = new AnnotationService({
+            api: this.options.api,
+            fileID: this.options.file.id,
+            token: this.options.token,
+            canAnnotate
+        });
+
+        // Construct and init annotator
+        this.annotator = new MediaAnnotator({
+            annotatedElement: this.wrapperEl,
+            annotationService,
+            fileVersionID,
+            locale: this.options.location.locale
+        });
+        this.annotator.init(this);
+
+        // Disable controls during point annotation mode
+        this.annotator.addListener('pointmodeenter', () => {
+            this.playingHandler();
+            this.removeEventListenersForMediaControls();
+            if (this.mediaControls) {
+                this.mediaControls.disable();
+            }
+        });
+
+        this.annotator.addListener('pointmodeexit', () => {
+            this.pauseHandler();
+            this.addEventListenersForMediaControls();
+            if (this.mediaControls) {
+                this.mediaControls.enable();
+            }
+        });
+    }
+
+    /**
+     * Returns whether or not viewer is annotatable with the provided annotation
+     * type.
+     *
+     * @param {string} type Type of annotation
+     * @returns {boolean} Whether or not viewer is annotatable
+     */
+    isAnnotatable(type) {
+        if (typeof type === 'string' && type !== 'point') {
+            return false;
+        }
+
+        // Otherwise, use global preview annotation option
+        return true;
+    }
+
+    /**
+     * Returns click handler for toggling point annotation mode.
+     *
+     * @returns {Function|null} Click handler
+     */
+    getPointModeClickHandler() {
+        if (!this.isAnnotatable('point')) {
+            return null;
+        }
+
+        return this.annotator.togglePointModeHandler;
     }
 }
 

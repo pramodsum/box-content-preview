@@ -155,38 +155,55 @@ class MediaBase extends Base {
      * @returns {void}
      */
     addEventListenersForMediaControls() {
-        this.mediaControls.addListener('timeupdate', (value) => {
-            this.mediaEl.currentTime = value * this.mediaEl.duration;
-        });
-
-        this.mediaControls.addListener('volumeupdate', (value) => {
-            cache.set('media-volume', value);
-            this.handleVolume();
-        });
-
-        this.mediaControls.addListener('toggleplayback', () => {
-            if (this.mediaEl.paused) {
-                this.mediaEl.play();
-                this.emit('play');
-                this.handleSpeed();
-                this.handleVolume();
-            } else {
-                this.mediaEl.pause();
-                this.emit('pause');
-            }
-        });
-
-        this.mediaControls.addListener('togglemute', () => {
-            if (this.mediaEl.volume) {
-                this.oldVolume = this.mediaEl.volume;
-                cache.set('media-volume', 0);
-            } else {
-                cache.set('media-volume', this.oldVolume);
-            }
-            this.handleVolume();
-        });
-
+        this.mediaControls.addListener('timeupdate', this.timeUpdate);
+        this.mediaControls.addListener('volumeupdate', this.volumeUpdate);
+        this.mediaControls.addListener('toggleplayback', this.togglePlayback);
+        this.mediaControls.addListener('togglemute', this.toggleMute);
         this.mediaControls.addListener('speedchange', this.handleSpeed);
+    }
+
+    /**
+     * Removes event listeners to the media controls.
+     * Makes changes to the media element.
+     *
+     * @private
+     * @returns {void}
+     */
+    removeEventListenersForMediaControls() {
+        this.mediaControls.removeListener('timeupdate', this.timeUpdate);
+        this.mediaControls.removeListener('volumeupdate', this.volumeUpdate);
+        this.mediaControls.removeListener('toggleplayback', this.togglePlayback);
+        this.mediaControls.removeListener('togglemute', this.toggleMute);
+        this.mediaControls.removeListener('speedchange', this.handleSpeed);
+    }
+
+    timeUpdate(value) {
+        this.mediaEl.currentTime = value * this.mediaEl.duration;
+    }
+
+    volumeUpdate(value) {
+        cache.set('media-volume', value);
+        this.handleVolume();
+    }
+
+    togglePlayback() {
+        if (this.mediaEl.paused) {
+            this.mediaEl.play();
+            this.handleSpeed();
+            this.handleVolume();
+        } else {
+            this.mediaEl.pause();
+        }
+    }
+
+    toggleMute() {
+        if (this.mediaEl.volume) {
+            this.oldVolume = this.mediaEl.volume;
+            cache.set('media-volume', 0);
+        } else {
+            cache.set('media-volume', this.oldVolume);
+        }
+        this.handleVolume();
     }
 
     /**

@@ -471,6 +471,11 @@ class Dash extends VideoBase {
      * @returns {boolean} consumed or not
      */
     onKeydown(key) {
+        // Ignore zoom/pan mouse events if in annotation mode
+        if (this.annotator && this.annotator.isInPointMode()) {
+            return true;
+        }
+
         if (key === 'Shift+I' && this.player) {
             this.toggleStats();
             return true;

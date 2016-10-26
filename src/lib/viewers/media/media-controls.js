@@ -5,6 +5,7 @@ import Scrubber from './scrubber';
 import Settings from './settings';
 import fullscreen from '../../fullscreen';
 import { insertTemplate } from '../../util';
+import { CLASS_HIDDEN } from '../../constants';
 
 const SHOW_CONTROLS_CLASS = 'box-preview-media-controls-is-visible';
 const PLAYING_CLASS = 'box-preview-media-is-playing';
@@ -346,6 +347,22 @@ class MediaControls extends EventEmitter {
     }
 
     /**
+     * Removes event handlers to buttons
+     * @returns {void}
+     */
+    removeEventHandlers() {
+        this.wrapperEl.removeEventListener('mouseenter', this.mouseenterHandler);
+        this.wrapperEl.removeEventListener('mouseleave', this.mouseleaveHandler);
+        this.playButtonEl.removeEventListener('click', this.togglePlay);
+
+        this.volLevelButtonEl.removeEventListener('click', this.toggleMute);
+        this.fullscreenButtonEl.removeEventListener('click', this.toggleFullscreen);
+        this.settingsButtonEl.removeEventListener('click', this.toggleSettings);
+        fullscreen.removeListener('exit', () =>
+            this.setLabel(this.fullscreenButtonEl, __('enter_fullscreen')));
+    }
+
+    /**
      * Handles the mouse enter event.
      * Prevents hiding of the controls.
      *
@@ -576,6 +593,26 @@ class MediaControls extends EventEmitter {
      */
     isFocused() {
         return this.wrapperEl.contains(document.activeElement);
+    }
+
+    /**
+     * Enables the controls.
+     *
+     * @returns {void}
+     */
+    enable() {
+        this.wrapperEl.classList.remove(CLASS_HIDDEN);
+        this.attachEventHandlers();
+    }
+
+    /**
+     * Disables the controls.
+     *
+     * @returns {void}
+     */
+    disable() {
+        this.wrapperEl.classList.add(CLASS_HIDDEN);
+        this.removeEventHandlers();
     }
 }
 
