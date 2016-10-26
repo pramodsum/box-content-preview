@@ -35,3 +35,35 @@
      }
      annotatorUtil.showElement(annotateButton);
  }
+
+ /**
+  * Returns browser coordinates given an annotation location object and
+  * the HTML element being annotated on.
+  * @param {Object} location Annotation location object
+  * @param {HTMLElement} annotatedElement HTML element being annotated on
+  * @returns {number[]} [x,y] browser coordinates
+  */
+ export function getBrowserCoordinatesFromLocation(location, annotatedElement) {
+     const mediaEl = annotatedElement.querySelector('video');
+     const wrapperDimensions = annotatedElement.getBoundingClientRect();
+     const mediaDimensions = mediaEl.getBoundingClientRect();
+
+     // Get media padding
+     const topPadding = mediaDimensions.top - wrapperDimensions.top;
+     const leftPadding = mediaDimensions.left - wrapperDimensions.left;
+
+     // Adjust annotation location if media is rotated
+     // todo(@spramod): Fix annotation locations on zoom when rotated
+     let [x, y] = [location.x, location.y];
+
+     // Add padding based on current zoom
+     if (leftPadding >= 0) {
+         x += leftPadding;
+     }
+
+     if (topPadding >= 0) {
+         y += topPadding;
+     }
+
+     return [x, y];
+ }
