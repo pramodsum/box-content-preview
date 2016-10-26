@@ -76,6 +76,13 @@ class Dash extends VideoBase {
         this.mediaEl.addEventListener('loadedmetadata', this.loadedmetadataHandler);
         this.loadDashPlayer();
         this.resetLoadTimeout();
+
+        // Show existing annotations after image is rendered
+        if (!this.annotator || this.annotationsLoaded) {
+            return;
+        }
+        this.annotator.showAnnotations();
+        this.annotationsLoaded = true;
     }
 
     /**
