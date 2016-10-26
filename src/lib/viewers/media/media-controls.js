@@ -6,6 +6,7 @@ import Settings from './settings';
 import fullscreen from '../../fullscreen';
 import { insertTemplate } from '../../util';
 import { CLASS_HIDDEN } from '../../constants';
+import { CLASS_ANNOTATION_POINT_MODE } from '../../annotations/annotation-constants';
 
 const SHOW_CONTROLS_CLASS = 'box-preview-media-controls-is-visible';
 const PLAYING_CLASS = 'box-preview-media-is-playing';
@@ -393,7 +394,7 @@ class MediaControls extends EventEmitter {
      * @returns {void}
      */
     show() {
-        if (!this.wrapperEl || !this.wrapperEl.parentNode) {
+        if (!this.wrapperEl || !this.wrapperEl.parentNode || this.isInPointMode()) {
             return;
         }
 
@@ -420,6 +421,16 @@ class MediaControls extends EventEmitter {
         if (this.wrapperEl && this.wrapperEl.parentNode) {
             this.wrapperEl.parentNode.classList.remove(SHOW_CONTROLS_CLASS);
         }
+    }
+
+    /**
+     * Returns whether or not annotator is in point mode.
+     *
+     * @returns {boolean} Whether or not in point mode
+     * @protected
+     */
+    isInPointMode() {
+        return this.containerEl.classList.contains(CLASS_ANNOTATION_POINT_MODE);
     }
 
     /**
