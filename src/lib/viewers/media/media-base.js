@@ -145,6 +145,8 @@ class MediaBase extends Base {
 
         // Add event listeners for the media element
         this.addEventListenersForMediaElement();
+
+        this.timeUpdate(0);
     }
 
     /**
@@ -179,6 +181,10 @@ class MediaBase extends Base {
 
     timeUpdate(value) {
         this.mediaEl.currentTime = value * this.mediaEl.duration;
+
+        if (this.annotator) {
+            this.annotator._currentTime = this.mediaEl.currentTime;
+        }
     }
 
     volumeUpdate(value) {

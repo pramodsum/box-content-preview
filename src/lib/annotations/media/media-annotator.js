@@ -6,6 +6,7 @@
 import autobind from 'autobind-decorator';
 import Annotator from '../annotator';
 import MediaPointThread from './media-point-thread';
+import * as annotatorUtil from '../annotator-util';
 
 @autobind
 class MediaAnnotator extends Annotator {
@@ -25,7 +26,42 @@ class MediaAnnotator extends Annotator {
      * @returns {Object|null} Location object
      */
     getLocationFromEvent(event) {
-        return event;
+        let location = null;
+
+        // Get media tag inside viewer
+        const mediaEl = this._annotatedElement.querySelector('video');
+        if (!mediaEl) {
+            return location;
+        }
+
+        // If click is inside an annotation dialog, ignore
+        const dataType = annotatorUtil.findClosestDataType(this._annotatedElement);
+        if (dataType === 'annotation-dialog' || dataType === 'annotation-indicator') {
+            return location;
+        }
+
+        // Location based only on media position
+        const mediaDimensions = mediaEl.getBoundingClientRect();
+        const [x, y] = [(event.clientX - mediaDimensions.left), (event.clientY - mediaDimensions.top)];
+
+        // If click isn't in media area, ignore
+        if (event.clientX > mediaDimensions.right || event.clientX < mediaDimensions.left ||
+            event.clientY > mediaDimensions.bottom || event.clientY < mediaDimensions.top) {
+            return location;
+        }
+
+        // We save the dimensions of the annotated element so we can
+        // compare to the element being rendered on and scale as appropriate
+        const dimensions = {
+            x: mediaDimensions.width,
+            y: mediaDimensions.height
+        };
+
+        const currentTime = this._currentTime;
+
+        location = { x, y, mediaEl, dimensions, currentTime };
+
+        return location;
     }
 
     /**

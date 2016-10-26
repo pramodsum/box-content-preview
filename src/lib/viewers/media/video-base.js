@@ -206,7 +206,7 @@ class VideoBase extends MediaBase {
 
         // Construct and init annotator
         this.annotator = new MediaAnnotator({
-            annotatedElement: this.wrapperEl,
+            annotatedElement: this.mediaContainerEl,
             annotationService,
             fileVersionID,
             locale: this.options.location.locale
