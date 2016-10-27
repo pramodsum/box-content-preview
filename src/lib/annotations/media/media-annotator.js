@@ -94,6 +94,68 @@ class MediaAnnotator extends Annotator {
         this.addThreadToMap(thread);
         return thread;
     }
+
+    /**
+    * Shows all annotations on the media. Shows button in header that
+    * enables point annotation mode
+    *
+    * @returns {void}
+    */
+    showAnnotationsBetweenTimes(lastCheckedTime, currentTime) {
+        // Get media tag inside viewer
+        const mediaEl = this._annotatedElement.querySelector('video');
+        const startedPaused = mediaEl.paused;
+        Object.keys(this._threads).forEach((page) => {
+            this._threads[page].forEach((thread) => {
+                if (lastCheckedTime <= thread.location.currentTime && thread.location.currentTime <= currentTime) {
+                    if (!mediaEl) {
+                        return;
+                    }
+                    if (!startedPaused) {
+                        mediaEl.pause();
+                        thread.show();
+                    }
+                } else {
+                    if (!startedPaused) {
+                        thread.hide();
+                        if (thread.state === constants.ANNOTATION_STATE_PENDING) {
+                            thread.destroy();
+                        }
+                    }
+                    const test = '';
+                    test.charAt(0);
+                }
+            });
+        });
+    }
+
+    loadScrubberAnnotations() {
+        const annotationsEl = document.querySelector('.box-preview-media-scrubber-annotations');
+
+        // Get media tag inside viewer
+        const mediaEl = this._annotatedElement.querySelector('video');
+        if (!mediaEl) {
+            return;
+        }
+
+        Object.keys(this._threads).forEach((page) => {
+            this._threads[page].forEach((thread) => {
+                const time = thread.location.currentTime;
+
+                // create element
+                const scrubberAnnotation = document.createElement('div');
+                scrubberAnnotation.classList.add('box-preview-media-scrubber-annotation');
+
+                // calculate "time" position on scrubber
+                const duration = mediaEl.duration;
+                const scrubberPos = duration ? time / duration : 0;
+
+                // add element to time on scrubber
+                scrubberAnnotation.style.left = `${scrubberPos * 100}%`;
+                annotationsEl.appendChild(scrubberAnnotation);
+            });
+        });
+    }
 }
 
 export default MediaAnnotator;

@@ -31,6 +31,7 @@ class VideoBase extends MediaBase {
         this.playButtonEl.classList.add(CLASS_PLAY_BUTTON);
         this.playButtonEl.classList.add(CLASS_HIDDEN);
         this.playButtonEl.innerHTML = PLAY_ICON;
+        this.lastCheckedTime = 0;
 
         this.initAnnotations();
     }
@@ -101,6 +102,25 @@ class VideoBase extends MediaBase {
     waitingHandler() {
         if (this.containerEl) {
             this.containerEl.classList.remove(CLASS_PREVIEW_LOADED);
+        }
+    }
+
+    /**
+     * Updates time code.
+     *
+     * @private
+     * @returns {void}
+     */
+    setTimeCode() {
+        super.setTimeCode();
+
+        if (this.annotator) {
+            this.annotator._currentTime = this.mediaEl.currentTime;
+
+            this.annotator.showAnnotationsBetweenTimes(this.lastCheckedTime, this.mediaEl.currentTime);
+
+
+            this.lastCheckedTime = this.mediaEl.currentTime;
         }
     }
 
