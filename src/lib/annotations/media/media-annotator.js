@@ -7,6 +7,7 @@ import autobind from 'autobind-decorator';
 import Annotator from '../annotator';
 import MediaPointThread from './media-point-thread';
 import * as annotatorUtil from '../annotator-util';
+import * as constants from '../annotation-constants';
 
 @autobind
 class MediaAnnotator extends Annotator {
@@ -92,6 +93,7 @@ class MediaAnnotator extends Annotator {
 
         const thread = new MediaPointThread(threadParams);
         this.addThreadToMap(thread);
+        this.loadScrubberAnnotations();
         return thread;
     }
 
