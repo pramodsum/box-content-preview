@@ -93,8 +93,17 @@ class AnnotationThread extends EventEmitter {
      *
      * @returns {void}
      */
-    hide() {
-        annotatorUtil.hideElement(this._element);
+    hide(noDelay = true) {
+        if (noDelay) {
+            annotatorUtil.hideElement(this._element);
+            clearTimeout(this._timeoutHandler);
+            this._timeoutHandler = null;
+        } else if (!this._timeoutHandler) {
+            this._timeoutHandler = setTimeout(() => {
+                annotatorUtil.hideElement(this._element);
+                this._timeoutHandler = null;
+            }, 1000);
+        }
     }
 
     /**

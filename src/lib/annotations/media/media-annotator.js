@@ -107,17 +107,23 @@ class MediaAnnotator extends Annotator {
         const startedPaused = mediaEl.paused;
         Object.keys(this._threads).forEach((page) => {
             this._threads[page].forEach((thread) => {
-                if (lastCheckedTime <= thread.location.currentTime && thread.location.currentTime <= currentTime) {
+                const timeWindow = Math.abs(lastCheckedTime - currentTime);
+                const shouldDisplay = (this.isBetweenTwoValues(lastCheckedTime, currentTime, thread.location.currentTime) && timeWindow < 1) ||
+                    (this.isBetweenTwoValues(currentTime + 0.75, currentTime - 0.75, thread.location.currentTime) && timeWindow > 1);
+                if (shouldDisplay) {
                     if (!mediaEl) {
                         return;
                     }
                     if (!startedPaused) {
-                        mediaEl.pause();
-                        thread.show();
+                        // mediaEl.pause();
                     }
+                    thread.show();
                 } else {
-                    if (!startedPaused) {
-                        thread.hide();
+                    if (!startedPaused || timeWindow > 1) {
+                        if (timeWindow > 1) {
+                            thread.hide();
+                        }
+                        thread.hide(false);
                         if (thread.state === constants.ANNOTATION_STATE_PENDING) {
                             thread.destroy();
                         }
@@ -127,6 +133,15 @@ class MediaAnnotator extends Annotator {
                 }
             });
         });
+    }
+
+    isBetweenTwoValues(endpointA, endpointB, middleCheck) {
+        if (endpointA <= middleCheck && middleCheck <= endpointB) {
+            return true;
+        } else if (endpointB <= middleCheck && middleCheck <= endpointA) {
+            return true;
+        }
+        return false;
     }
 
     loadScrubberAnnotations() {
@@ -153,8 +168,17 @@ class MediaAnnotator extends Annotator {
                 // add element to time on scrubber
                 scrubberAnnotation.style.left = `${scrubberPos * 100}%`;
                 annotationsEl.appendChild(scrubberAnnotation);
+                scrubberAnnotation.setAttribute('data-time', time);
+                scrubberAnnotation.addEventListener('click', this.clickHandler);
+                // annotationsEl.addEventListener('mouseover', this.mouseoverHandler);
             });
         });
+    }
+
+    clickHandler(event) {
+        const mediaEl = this._annotatedElement.querySelector('video');
+        mediaEl.pause();
+        mediaEl.currentTime = event.target.getAttribute('data-time');
     }
 }
 
