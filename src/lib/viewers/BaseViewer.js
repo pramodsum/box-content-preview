@@ -12,8 +12,11 @@ import {
     prefetchAssets,
     createAssetUrlCreator
 } from '../util';
+import { checkPermission, checkFeature } from '../file';
+import { showAnnotateButton } from '../ui';
 import Browser from '../Browser';
 import {
+    PERMISSION_ANNOTATE,
     CLASS_FULLSCREEN,
     CLASS_BOX_PREVIEW_MOBILE,
     SELECTOR_BOX_PREVIEW,
@@ -21,6 +24,7 @@ import {
     STATUS_VIEWABLE
 } from '../constants';
 
+const JS = ['annotations.js'];
 const LOAD_TIMEOUT_MS = 180000; // 3m
 const RESIZE_WAIT_TIME_IN_MILLIS = 300;
 
@@ -110,6 +114,52 @@ class BaseViewer extends EventEmitter {
      */
     load() {
         this.resetLoadTimeout();
+
+        return this.loadAssets(JS)
+            .then(() => {
+                /* global AnnotatorLoader */
+                this.loader = new AnnotatorLoader();
+
+                this.annotator = this.loader.determineAnnotator(this.options.viewer.NAME);
+                if (this.annotator && this.isAnnotatable()) {
+                    this.initAnnotations();
+                }
+            })
+            .catch(this.handleAssetError);
+    }
+
+    loadUI() {
+        // Show existing annotations after file is rendered
+        if (this.annotator && !this.annotationsLoaded) {
+            this.annotator.showAnnotations();
+            this.annotationsLoaded = true;
+        }
+    }
+
+    initAnnotations() {
+        if (checkPermission(this.file, PERMISSION_ANNOTATE) && !Browser.isMobile() && checkFeature(this.viewer, 'isAnnotatable', 'point')) {
+            showAnnotateButton(this.viewer.getPointModeClickHandler());
+        }
+
+        const { apiHost, file, location, token } = this.options;
+        const fileVersionID = file.file_version.id;
+
+        // Users can currently only view annotations on mobile
+        const canAnnotate = checkPermission(file, PERMISSION_ANNOTATE) && !Browser.isMobile();
+        const annotationOptions = {
+            apiHost,
+            fileId: file.id,
+            token
+        };
+
+        // Construct and init annotator
+        this.annotator = new this.annotator.CONSTRUCTOR({
+            canAnnotate,
+            containerEl: this.containerEl,
+            options: annotationOptions,
+            fileVersionID,
+            locale: location.locale
+        });
     }
 
     /**
@@ -246,6 +296,14 @@ class BaseViewer extends EventEmitter {
         fullscreen.addListener('exit', () => {
             this.containerEl.classList.remove(CLASS_FULLSCREEN);
             this.resize();
+        });
+
+        // Add a custom listener for events related to scaling/orientation changes
+        this.addListener('scale', (scale, rotationAngle) => {
+            if (this.annotator) {
+                this.annotator.setScale(scale);
+                this.annotator.renderAnnotations(rotationAngle);
+            }
         });
 
         // Add a resize handler for the window
@@ -477,6 +535,47 @@ class BaseViewer extends EventEmitter {
     isRepresentationReady(representation) {
         const status = RepStatus.getStatus(representation);
         return status === STATUS_SUCCESS || status === STATUS_VIEWABLE;
+    }
+
+    /**
+     * Returns click handler for toggling point annotation mode.
+     *
+     * @return {Function|null} Click handler
+     */
+    getPointModeClickHandler() {
+        if (!this.isAnnotatable('point')) {
+            return null;
+        }
+
+        return this.annotator.togglePointModeHandler;
+    }
+
+    /**
+     * Returns whether or not viewer is annotatable. If an optional type is
+     * passed in, we check if that type of annotation is allowed.
+     *
+     * @param {string} [type] - Type of annotation
+     * @return {boolean} Whether or not viewer is annotatable
+     */
+    isAnnotatable(type) {
+        if (type) {
+            const supportedType = this.annotator.TYPE.every((annotationType) => {
+                return type === annotationType;
+            });
+
+            if (!supportedType) {
+                return false;
+            }
+        }
+
+        // Respect viewer-specific annotation option if it is set
+        const viewerAnnotations = this.getViewerOption('annotations');
+        if (typeof viewerAnnotations === 'boolean') {
+            return viewerAnnotations;
+        }
+
+        // Otherwise, use global preview annotation option
+        return this.options.showAnnotations;
     }
 }
 

@@ -3,7 +3,8 @@ import autobind from 'autobind-decorator';
 import Notification from '../Notification';
 import AnnotationService from './AnnotationService';
 import * as constants from './annotationConstants';
-import { CLASS_ACTIVE } from '../constants';
+import * as annotatorUtil from './annotatorUtil';
+import { CLASS_ACTIVE, SELECTOR_BOX_PREVIEW_BTN_ANNOTATE } from '../constants';
 
 @autobind
 class Annotator extends EventEmitter {
@@ -32,13 +33,28 @@ class Annotator extends EventEmitter {
      */
     constructor(data) {
         super();
-        this._annotatedElement = data.annotatedElement;
-        this._annotationService = data.annotationService;
+
+        this.getAnnotatedEl(data.containerEl);
+
+        this.canAnnotate = data.canAnnotate;
         this._fileVersionID = data.fileVersionID;
         this._locale = data.locale;
         this.validationErrorDisplayed = false;
+        this._annotationService = this.initAnnotationService(data.options);
 
         this.notification = new Notification(this._annotatedElement);
+
+        this.init();
+    }
+
+    initAnnotationService(options) {
+        const { apiHost, fileId, token } = options;
+        return new AnnotationService({
+            apiHost,
+            fileId,
+            token,
+            canAnnotate: this.canAnnotate
+        });
     }
 
     /**
@@ -57,6 +73,10 @@ class Annotator extends EventEmitter {
 
         this.unbindDOMListeners();
         this.unbindCustomListenersOnService();
+
+        // Destroy the point mode listeners
+        this.removeAllListeners('pointmodeenter');
+        this.removeAllListeners('pointmodeexit');
     }
 
     /**
@@ -106,17 +126,34 @@ class Annotator extends EventEmitter {
     }
 
     /**
-     * Renders annotations from memory.
+     * Renders annotations from memory. Hides annotations if file is rotated
      *
      * @private
+     * @param {number} [rotationAngle] - current angle file is rotated
      * @return {void}
      */
-    renderAnnotations() {
+    renderAnnotations(rotationAngle = 0) {
         Object.keys(this._threads).forEach((page) => {
             this._threads[page].forEach((thread) => {
                 thread.show();
             });
         });
+
+        // Only show/hide point annotation button if user has the appropriate
+        // permissions
+        if (this._annotationService.canAnnotate) {
+            // Hide create annotations button if file is rotated
+            // TODO(@spramod) actually adjust getLocationFromEvent method in
+            // annotator to get correct location rather than disabling the creation
+            // of annotations on rotated files
+            const annotateButton = document.querySelector(SELECTOR_BOX_PREVIEW_BTN_ANNOTATE);
+
+            if (rotationAngle !== 0) {
+                annotatorUtil.hideElement(annotateButton);
+            } else {
+                annotatorUtil.showElement(annotateButton);
+            }
+        }
     }
 
     /**
@@ -217,6 +254,16 @@ class Annotator extends EventEmitter {
      */
     /* eslint-disable no-unused-vars */
     createAnnotationThread(annotations, location, type) {}
+    /* eslint-enable no-unused-vars */
+
+    /**
+     * Must be implemented to determine the annotated element in the viewer.
+     *
+     * @param {HTMLElement} containerEl - Container element for the viewer
+     * @return {void}
+     */
+    /* eslint-disable no-unused-vars */
+    getAnnotatedEl(containerEl) {}
     /* eslint-enable no-unused-vars */
 
     //--------------------------------------------------------------------------

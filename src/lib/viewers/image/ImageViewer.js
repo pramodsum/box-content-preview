@@ -1,11 +1,8 @@
 import autobind from 'autobind-decorator';
-import AnnotationService from '../../annotations/AnnotationService';
-import ImageAnnotator from '../../annotations/image/ImageAnnotator';
 import Browser from '../../Browser';
 import ImageBaseViewer from './ImageBaseViewer';
-import { checkPermission } from '../../file';
 import { ICON_ROTATE_LEFT, ICON_FULLSCREEN_IN, ICON_FULLSCREEN_OUT } from '../../icons/icons';
-import { CLASS_INVISIBLE, PERMISSION_ANNOTATE } from '../../constants';
+import { CLASS_INVISIBLE } from '../../constants';
 import { openContentInsideIframe } from '../../util';
 import './Image.scss';
 
@@ -31,7 +28,6 @@ class ImageViewer extends ImageBaseViewer {
         // hides image tag until content is loaded
         this.imageEl.classList.add(CLASS_INVISIBLE);
 
-        this.initAnnotations();
         this.currentRotationAngle = 0;
     }
 
@@ -40,12 +36,6 @@ class ImageViewer extends ImageBaseViewer {
      * @return {void}
      */
     destroy() {
-        // Destroy the annotator
-        if (this.annotator && typeof this.annotator.destroy === 'function') {
-            this.annotator.removeAllListeners('pointmodeenter');
-            this.annotator.destroy();
-        }
-
         // Remove listeners
         this.unbindDOMListeners();
 
@@ -120,10 +110,7 @@ class ImageViewer extends ImageBaseViewer {
 
         // Re-adjust image position after rotation
         this.handleOrientationChange();
-
-        if (this.annotator) {
-            this.scaleAnnotations(this.imageEl.offsetwidth, this.imageEl.offsetHeight);
-        }
+        this.setScale(this.imageEl.offsetwidth, this.imageEl.offsetHeight);
     }
 
     /**
@@ -230,9 +217,7 @@ class ImageViewer extends ImageBaseViewer {
         // Give the browser some time to render before updating pannability
         setTimeout(this.updatePannability, 50);
 
-        if (this.annotator) {
-            this.scaleAnnotations(newWidth, newHeight);
-        }
+        this.setScale(newWidth, newHeight);
 
         this.emit('zoom', {
             newScale: [newWidth || width, newHeight || height],
@@ -242,7 +227,7 @@ class ImageViewer extends ImageBaseViewer {
     }
 
     /**
-     * Scales annotations and repositions with rotation. Only one argument
+     * Scales and repositions image with rotation. Only one argument
      * (either height or width) is required for the scale calculations.
      *
      * @private
@@ -250,11 +235,10 @@ class ImageViewer extends ImageBaseViewer {
      * @param {number} height - The scale height
      * @return {void}
      */
-    scaleAnnotations(width, height) {
-        const scale = width ? (width / this.imageEl.naturalWidth) : (height / this.imageEl.naturalHeight);
-        const rotationAngle = this.currentRotationAngle % 3600 % 360;
-        this.annotator.setScale(scale);
-        this.annotator.renderAnnotations(rotationAngle);
+    setScale(width, height) {
+        this.scale = width ? (width / this.imageEl.naturalWidth) : (height / this.imageEl.naturalHeight);
+        this.rotationAngle = this.currentRotationAngle % 3600 % 360;
+        this.emit('scale', this.scale, this.rotationAngle);
     }
 
     /**
@@ -268,13 +252,6 @@ class ImageViewer extends ImageBaseViewer {
         this.controls.add(__('rotate_left'), this.rotateLeft, 'bp-image-rotate-left-icon', ICON_ROTATE_LEFT);
         this.controls.add(__('enter_fullscreen'), this.toggleFullscreen, 'bp-enter-fullscreen-icon', ICON_FULLSCREEN_IN);
         this.controls.add(__('exit_fullscreen'), this.toggleFullscreen, 'bp-exit-fullscreen-icon', ICON_FULLSCREEN_OUT);
-
-        // Show existing annotations after image is rendered
-        if (!this.annotator || this.annotationsLoaded) {
-            return;
-        }
-        this.annotator.showAnnotations();
-        this.annotationsLoaded = true;
     }
 
     /**
@@ -307,32 +284,7 @@ class ImageViewer extends ImageBaseViewer {
      * @return {void}
      */
     initAnnotations() {
-        // Ignore if viewer/file type is not annotatable
-        if (!this.isAnnotatable()) {
-            return;
-        }
-
-        // Users can currently only view annotations on mobile
-        const { apiHost, file, location, token } = this.options;
-        const canAnnotate = checkPermission(file, PERMISSION_ANNOTATE) && !Browser.isMobile();
-        this.canAnnotate = canAnnotate;
-
-        const fileVersionID = file.file_version.id;
-        const annotationService = new AnnotationService({
-            apiHost,
-            fileId: file.id,
-            token,
-            canAnnotate
-        });
-
-        // Construct and init annotator
-        this.annotator = new ImageAnnotator({
-            annotatedElement: this.wrapperEl,
-            annotationService,
-            fileVersionID,
-            locale: location.locale
-        });
-        this.annotator.init(this);
+        super.initAnnotations();
 
         // Disables controls during point annotation mode
         /* istanbul ignore next */
@@ -351,28 +303,6 @@ class ImageViewer extends ImageBaseViewer {
                 this.controls.enable();
             }
         });
-    }
-
-    /**
-     * Returns whether or not viewer is annotatable with the provided annotation
-     * type.
-     *
-     * @param {string} type - Type of annotation
-     * @return {boolean} Whether or not viewer is annotatable
-     */
-    isAnnotatable(type) {
-        if (typeof type === 'string' && type !== 'point') {
-            return false;
-        }
-
-        // Respect viewer-specific annotation option if it is set
-        const viewerAnnotations = this.getViewerOption('annotations');
-        if (typeof viewerAnnotations === 'boolean') {
-            return viewerAnnotations;
-        }
-
-        // Otherwise, use global preview annotation option
-        return this.options.showAnnotations;
     }
 
     /**
@@ -465,21 +395,6 @@ class ImageViewer extends ImageBaseViewer {
     }
 
     /**
-     * Handles mouse down event.
-     *
-     * @param {Event} event - The mousemove event
-     * @return {void}
-     */
-    handleMouseUp(event) {
-        // Ignore zoom/pan mouse events if in annotation mode
-        if (this.annotator && this.annotator.isInPointMode()) {
-            return;
-        }
-
-        super.handleMouseUp(event);
-    }
-
-    /**
     * Adjust padding on image rotation/zoom of images when the view port
     * orientation changes from landscape to portrait and vice versa. Especially
     * important for mobile devices because rotating the device doesn't triggers
@@ -489,13 +404,9 @@ class ImageViewer extends ImageBaseViewer {
     */
     handleOrientationChange() {
         this.adjustImageZoomPadding();
-
-        if (this.annotator) {
-            const scale = (this.imageEl.clientWidth / this.imageEl.naturalWidth);
-            const rotationAngle = this.currentRotationAngle % 3600 % 360;
-            this.annotator.setScale(scale);
-            this.annotator.renderAnnotations(rotationAngle);
-        }
+        this.scale = (this.imageEl.clientWidth / this.imageEl.naturalWidth);
+        this.rotationAngle = this.currentRotationAngle % 3600 % 360;
+        this.emit('scale', this.scale, this.rotationAngle);
     }
 
     /**
@@ -504,14 +415,12 @@ class ImageViewer extends ImageBaseViewer {
      * @return {Function|null} Click handler
      */
     getPointModeClickHandler() {
-        if (!this.isAnnotatable('point')) {
-            return null;
-        }
+        const pointModeHandler = super.getPointModeClickHandler();
 
         return (event = {}) => {
             this.imageEl.classList.remove(CSS_CLASS_ZOOMABLE);
             this.imageEl.classList.remove(CSS_CLASS_PANNABLE);
-            this.annotator.togglePointModeHandler(event);
+            pointModeHandler(event);
         };
     }
 }

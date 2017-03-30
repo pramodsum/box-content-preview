@@ -13,6 +13,16 @@ class ImageAnnotator extends Annotator {
     //--------------------------------------------------------------------------
 
     /**
+     * Determines the annotated element in the viewer
+     *
+     * @param {HTMLElement} containerEl - Container element for the viewer
+     * @return {void}
+     */
+    getAnnotatedEl(containerEl) {
+        this._annotatedElement = containerEl.querySelector('.bp-image');
+    }
+
+    /**
      * Returns an annotation location on an image from the DOM event or null
      * if no correct annotation location can be inferred from the event. For
      * point annotations, we return the (x, y) coordinates for the point
@@ -131,32 +141,24 @@ class ImageAnnotator extends Annotator {
         annotatorUtil.showElement(annotateButton);
     }
 
-    /**
-     * Renders annotations from memory. Hides annotations if image is rotated
-     *
-     * @override
-     * @param {number} [rotationAngle] - current angle image is rotated
-     * @return {void}
-     * @private
-     */
-    renderAnnotations(rotationAngle = 0) {
-        super.renderAnnotations();
-
-        // Only show/hide point annotation button if user has the appropriate
-        // permissions
-        if (this._annotationService.canAnnotate) {
-            // Hide create annotations button if image is rotated
-            // TODO(@spramod) actually adjust getLocationFromEvent method in
-            // annotator to get correct location rather than disabling the creation
-            // of annotations on rotated images
-            const annotateButton = document.querySelector(SELECTOR_BOX_PREVIEW_BTN_ANNOTATE);
-
-            if (rotationAngle !== 0) {
-                annotatorUtil.hideElement(annotateButton);
-            } else {
-                annotatorUtil.showElement(annotateButton);
-            }
+    bindDOMListeners() {
+        // Get image tag inside viewer
+        const imageEl = this._annotatedElement.querySelector('img');
+        if (imageEl) {
+            this._annotatedElement.addEventListener('mouseup', this.handleMouseUp);
         }
+    }
+
+    unbindDOMListeners() {
+        // Get image tag inside viewer
+        const imageEl = this._annotatedElement.querySelector('img');
+        if (imageEl) {
+            this._annotatedElement.removeEventListener('mouseup', this.handleMouseUp);
+        }
+    }
+
+    handleMouseUp(event) {
+        event.preventDefault();
     }
 }
 

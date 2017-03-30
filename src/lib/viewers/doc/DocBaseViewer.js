@@ -1,11 +1,9 @@
 import autobind from 'autobind-decorator';
 import throttle from 'lodash.throttle';
-import AnnotationService from '../../annotations/AnnotationService';
 import BaseViewer from '../BaseViewer';
 import Browser from '../../Browser';
 import cache from '../../Cache';
 import Controls from '../../Controls';
-import DocAnnotator from '../../annotations/doc/DocAnnotator';
 import DocFindBar from './DocFindBar';
 import fullscreen from '../../Fullscreen';
 import Popup from '../../Popup';
@@ -14,7 +12,6 @@ import {
     CLASS_HIDDEN,
     CLASS_IS_SCROLLABLE,
     DOC_STATIC_ASSETS_VERSION,
-    PERMISSION_ANNOTATE,
     PERMISSION_DOWNLOAD,
     PRELOAD_REP_NAME
 } from '../../constants';
@@ -79,13 +76,6 @@ class DocBaseViewer extends BaseViewer {
 
         if (this.controls && typeof this.controls.destroy === 'function') {
             this.controls.destroy();
-        }
-
-        // Destroy the annotator
-        if (this.annotator && typeof this.annotator.destroy === 'function') {
-            this.annotator.removeAllListeners('pointmodeenter');
-            this.annotator.removeAllListeners('pointmodeexit');
-            this.annotator.destroy();
         }
 
         // Clean up the find bar
@@ -216,6 +206,8 @@ class DocBaseViewer extends BaseViewer {
         this.initViewer(this.pdfUrl);
         this.initPrint();
         this.initFind();
+
+        this.setScale(this.pdfViewer.currentScale);
     }
 
     /**
@@ -323,10 +315,7 @@ class DocBaseViewer extends BaseViewer {
 
         this.setPage(currentPageNumber);
 
-        // Update annotations scale
-        if (this.annotator) {
-            this.annotator.setScale(this.pdfViewer.currentScale); // Set scale to current numerical scale
-        }
+        this.setScale(this.pdfViewer.currentScale); // Set scale to current numerical scale
 
         super.resize();
     }
@@ -501,46 +490,8 @@ class DocBaseViewer extends BaseViewer {
      */
     setScale(scale) {
         // Redraw annotations if needed
-        if (this.annotator) {
-            this.annotator.setScale(scale);
-        }
-
+        this.emit('scale', scale);
         this.pdfViewer.currentScaleValue = scale;
-    }
-
-    /**
-     * Returns whether or not viewer is annotatable. If an optional type is
-     * passed in, we check if that type of annotation is allowed.
-     *
-     * @param {string} [type] - Type of annotation
-     * @return {boolean} Whether or not viewer is annotatable
-     */
-    isAnnotatable(type) {
-        if (typeof type === 'string' && type !== 'point' && type !== 'highlight') {
-            return false;
-        }
-
-        // Respect viewer-specific annotation option if it is set
-        const viewerAnnotations = this.getViewerOption('annotations');
-        if (typeof viewerAnnotations === 'boolean') {
-            return viewerAnnotations;
-        }
-
-        // Otherwise, use global preview annotation option
-        return this.options.showAnnotations;
-    }
-
-    /**
-     * Returns click handler for toggling point annotation mode.
-     *
-     * @return {Function|null} Click handler
-     */
-    getPointModeClickHandler() {
-        if (!this.isAnnotatable('point')) {
-            return null;
-        }
-
-        return this.annotator.togglePointModeHandler;
     }
 
     /**
@@ -679,35 +630,17 @@ class DocBaseViewer extends BaseViewer {
      */
     initAnnotations() {
         this.setupPageIds();
-
-        const { apiHost, file, location, token } = this.options;
-        const fileVersionID = file.file_version.id;
-        // Users can currently only view annotations on mobile
-        const canAnnotate = checkPermission(file, PERMISSION_ANNOTATE) && !Browser.isMobile();
-        const annotationService = new AnnotationService({
-            apiHost,
-            fileId: file.id,
-            token,
-            canAnnotate
-        });
-
-        // Construct and init annotator
-        this.annotator = new DocAnnotator({
-            annotatedElement: this.docEl,
-            annotationService,
-            fileVersionID,
-            locale: location.locale
-        });
-        this.annotator.init();
-        this.annotator.setScale(this.pdfViewer.currentScale);
+        super.initAnnotations();
 
         // Disable controls during point annotation mode
+        /* istanbul ignore next */
         this.annotator.addListener('pointmodeenter', () => {
             if (this.controls) {
                 this.controls.disable();
             }
         });
 
+        /* istanbul ignore next */
         this.annotator.addListener('pointmodeexit', () => {
             if (this.controls) {
                 this.controls.enable();
@@ -830,6 +763,7 @@ class DocBaseViewer extends BaseViewer {
         this.controls = new Controls(this.containerEl);
         this.bindControlListeners();
         this.initPageNumEl();
+        super.loadUI();
     }
 
     /**
@@ -909,9 +843,6 @@ class DocBaseViewer extends BaseViewer {
 
         // When a page is rendered, rerender annotations if needed
         this.docEl.addEventListener('pagerendered', this.pagerenderedHandler);
-
-        // When text layer is rendered, show annotations if enabled
-        this.docEl.addEventListener('textlayerrendered', this.textlayerrenderedHandler);
 
         // Update page number when page changes
         this.docEl.addEventListener('pagechange', this.pagechangeHandler);
@@ -1039,11 +970,6 @@ class DocBaseViewer extends BaseViewer {
     pagesinitHandler() {
         this.pdfViewer.currentScaleValue = 'auto';
 
-        // Initialize annotations before other UI
-        if (this.isAnnotatable()) {
-            this.initAnnotations();
-        }
-
         this.loadUI();
         this.checkPaginationButtons();
 
@@ -1072,17 +998,6 @@ class DocBaseViewer extends BaseViewer {
     pagerenderedHandler(event) {
         const pageNumber = event.detail ? event.detail.pageNumber : undefined;
 
-        // Render annotations by page
-        if (this.annotator) {
-            // We should get a page number from pdfViewer most of the time
-            if (pageNumber) {
-                this.annotator.renderAnnotationsOnPage(pageNumber);
-                // If not, we re-render all annotations to be safe
-            } else {
-                this.annotator.renderAnnotations();
-            }
-        }
-
         // If text layer is disabled due to permissions, we still want to show annotations
         if (PDFJS.disableTextLayer) {
             this.textlayerrenderedHandler();
@@ -1099,22 +1014,6 @@ class DocBaseViewer extends BaseViewer {
                 this.somePageRendered = true;
             }
         }
-    }
-
-    /**
-     * Handler for 'textlayerrendered' event.
-     *
-     * @return {void}
-     * @private
-     */
-    textlayerrenderedHandler() {
-        if (!this.annotator || this.annotationsLoaded) {
-            return;
-        }
-
-        // Show existing annotations after text layer is rendered
-        this.annotator.showAnnotations();
-        this.annotationsLoaded = true;
     }
 
     /**
