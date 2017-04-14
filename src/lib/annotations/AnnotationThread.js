@@ -6,6 +6,9 @@ import * as annotatorUtil from './annotatorUtil';
 import * as constants from './annotationConstants';
 import { ICON_PLACED_ANNOTATION } from '../icons/icons';
 
+const PAGE_PADDING_BOTTOM = 15;
+const PAGE_PADDING_TOP = 15;
+
 @autobind
 class AnnotationThread extends EventEmitter {
 
@@ -337,6 +340,11 @@ class AnnotationThread extends EventEmitter {
     setupElement() {
         this._element = this.createElement();
         this.bindDOMListeners();
+
+        const annotationLayerEl = this._annotatedElement.querySelector('.bp-annotation-layer');
+        if (!annotationLayerEl) {
+            this.initAnnotationsLayer();
+        }
     }
 
     /**
@@ -489,6 +497,23 @@ class AnnotationThread extends EventEmitter {
      */
     deleteAnnotationWithID(data) {
         this.deleteAnnotation(data.annotationID);
+    }
+
+    initAnnotationsLayer(pageEl = null) {
+        const parentEl = pageEl || this._annotatedElement;
+        let annotationLayerEl = this._annotatedElement.querySelector('.bp-annotation-layer');
+
+        if (!annotationLayerEl) {
+            annotationLayerEl = document.createElement('canvas');
+            annotationLayerEl.classList.add('bp-annotation-layer');
+            const dimensions = parentEl.getBoundingClientRect();
+            annotationLayerEl.width = dimensions.width;
+            annotationLayerEl.height = dimensions.height - PAGE_PADDING_TOP - PAGE_PADDING_BOTTOM;
+
+            parentEl.appendChild(annotationLayerEl);
+        }
+
+        return annotationLayerEl;
     }
 }
 

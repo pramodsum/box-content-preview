@@ -484,18 +484,8 @@ class DocHighlightThread extends AnnotationThread {
             return null;
         }
 
-        let annotationLayerEl = pageEl.querySelector('.bp-annotation-layer');
-        if (!annotationLayerEl) {
-            annotationLayerEl = document.createElement('canvas');
-            annotationLayerEl.classList.add('bp-annotation-layer');
-            const pageDimensions = pageEl.getBoundingClientRect();
-            annotationLayerEl.width = pageDimensions.width;
-            annotationLayerEl.height = pageDimensions.height - PAGE_PADDING_TOP - PAGE_PADDING_BOTTOM;
-
-            const textLayerEl = pageEl.querySelector('.textLayer');
-            pageEl.insertBefore(annotationLayerEl, textLayerEl);
-        }
-
+        const annotationLayerEl = pageEl.querySelector('.bp-annotation-layer') ||
+            this.initAnnotationsLayer(pageEl);
         return annotationLayerEl.getContext('2d');
     }
 }

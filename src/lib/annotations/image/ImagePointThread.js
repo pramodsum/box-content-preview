@@ -23,12 +23,13 @@ class ImagePointThread extends AnnotationThread {
      * @return {void}
      */
     show() {
+        const annotationLayerEl = this.initAnnotationsLayer();
         const [browserX, browserY] = imageAnnotatorUtil.getBrowserCoordinatesFromLocation(this._location, this._annotatedElement);
 
         // Position and append to image
         this._element.style.left = `${browserX - (POINT_ANNOTATION_ICON_WIDTH / 2)}px`;
         this._element.style.top = `${browserY - POINT_ANNOTATION_ICON_HEIGHT + POINT_ANNOTATION_ICON_DOT_HEIGHT}px`;
-        this._annotatedElement.appendChild(this._element);
+        annotationLayerEl.appendChild(this._element);
 
         annotatorUtil.showElement(this._element);
 

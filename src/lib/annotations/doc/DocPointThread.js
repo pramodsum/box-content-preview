@@ -44,13 +44,15 @@ class DocPointThread extends AnnotationThread {
      */
     show() {
         const pageEl = this._annotatedElement.querySelector(`[data-page-number="${this._location.page}"]`) || this._annotatedElement;
+        const annotationLayerEl = pageEl.querySelector('.bp-annotation-layer') ||
+            this.initAnnotationsLayer(pageEl);
         const [browserX, browserY] = docAnnotatorUtil.getBrowserCoordinatesFromLocation(this._location, this._annotatedElement);
 
         // Position and append to page
         this._element.style.left = `${browserX - (POINT_ANNOTATION_ICON_WIDTH / 2)}px`;
         // Add 15px for vertical padding on page
         this._element.style.top = `${browserY - POINT_ANNOTATION_ICON_HEIGHT + (POINT_ANNOTATION_ICON_DOT_HEIGHT / 2) + PAGE_PADDING_TOP}px`;
-        pageEl.appendChild(this._element);
+        annotationLayerEl.appendChild(this._element);
 
         annotatorUtil.showElement(this._element);
 
