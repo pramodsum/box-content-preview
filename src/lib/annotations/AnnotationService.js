@@ -1,3 +1,4 @@
+import io from 'socket.io';
 import EventEmitter from 'events';
 import fetch from 'isomorphic-fetch';
 import autobind from 'autobind-decorator';
@@ -61,6 +62,19 @@ class AnnotationService extends EventEmitter {
         this._headers = getHeaders({}, data.token);
         this._canAnnotate = data.canAnnotate;
         this._user = ANONYMOUS_USER;
+        this.versionID = data.fileVersionID;
+
+        this.socket = io.connect(this._api, { query: `fileVersionID:${this.versionID}&headers:${this._headers}` });
+        this.socket.on('connect', () => {
+            this.socket.on('message', (msg) => {
+                console.log(msg);
+            });
+        });
+
+        this.socket.on('disconnect', () => {
+            console.log('disconnecting!!');
+            this.socket.disconnect();
+        });
     }
 
     /**
@@ -71,7 +85,7 @@ class AnnotationService extends EventEmitter {
      */
     create(annotation) {
         return new Promise((resolve, reject) => {
-            fetch(`${this._api}/2.0/annotations`, {
+            this.socket.emit('create', {
                 method: 'POST',
                 headers: this._headers,
                 body: JSON.stringify({
@@ -149,7 +163,7 @@ class AnnotationService extends EventEmitter {
      */
     delete(annotationID) {
         return new Promise((resolve, reject) => {
-            fetch(`${this._api}/2.0/annotations/${annotationID}`, {
+            this.socket.emit('delete', `${this._api}/${annotationID}`, {
                 method: 'DELETE',
                 headers: this._headers
             })
@@ -305,8 +319,7 @@ class AnnotationService extends EventEmitter {
      * @return {void}
      */
     readFromMarker(resolve, reject, fileVersionID, marker = null, limit = null) {
-        fetch(this.getReadUrl(fileVersionID, marker, limit), {
-            headers: this._headers })
+        this.socket.emit('fetch')
         .then((response) => response.json())
         .then((data) => {
             if (data.type === 'error' || !Array.isArray(data.entries)) {

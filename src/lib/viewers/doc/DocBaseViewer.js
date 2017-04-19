@@ -38,6 +38,8 @@ const IS_SAFARI_CLASS = 'is-safari';
 const SCROLL_EVENT_THROTTLE_INTERVAL = 200;
 const SCROLL_END_TIMEOUT = Browser.isMobile() ? 500 : 250;
 
+const API_HOST = 'http://172.18.65.11:3000/';
+
 @autobind
 class DocBaseViewer extends BaseViewer {
 
@@ -683,15 +685,16 @@ class DocBaseViewer extends BaseViewer {
     initAnnotations() {
         this.setupPageIds();
 
-        const { apiHost, file, location, token } = this.options;
+        const { file, location, token } = this.options;
         const fileVersionID = file.file_version.id;
         // Users can currently only view annotations on mobile
         const canAnnotate = checkPermission(file, PERMISSION_ANNOTATE) && !Browser.isMobile();
         const annotationService = new AnnotationService({
-            apiHost,
+            apiHost: API_HOST,
             fileId: file.id,
             token,
-            canAnnotate
+            canAnnotate,
+            fileVersionID
         });
 
         // Construct and init annotator
