@@ -15,6 +15,8 @@ const CSS_CLASS_IMAGE = 'bp-image';
 const IMAGE_PADDING = 15;
 const IMAGE_ZOOM_SCALE = 1.2;
 
+const API_HOST = 'https://172.18.65.11:3000/';
+
 @autobind
 class ImageViewer extends ImageBaseViewer {
     /**
@@ -313,16 +315,17 @@ class ImageViewer extends ImageBaseViewer {
         }
 
         // Users can currently only view annotations on mobile
-        const { apiHost, file, location, token } = this.options;
+        const { file, location, token } = this.options;
         const canAnnotate = checkPermission(file, PERMISSION_ANNOTATE) && !Browser.isMobile();
         this.canAnnotate = canAnnotate;
 
         const fileVersionID = file.file_version.id;
         const annotationService = new AnnotationService({
-            apiHost,
+            apiHost: API_HOST,
             fileId: file.id,
             token,
-            canAnnotate
+            canAnnotate,
+            fileVersionID
         });
 
         // Construct and init annotator

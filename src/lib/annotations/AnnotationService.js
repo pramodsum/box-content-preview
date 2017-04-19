@@ -1,6 +1,4 @@
-import io from 'socket.io';
 import EventEmitter from 'events';
-import fetch from 'isomorphic-fetch';
 import autobind from 'autobind-decorator';
 import Annotation from './Annotation';
 import { getHeaders } from '../util';
@@ -9,6 +7,7 @@ const ANONYMOUS_USER = {
     id: '0',
     name: __('annotation_anonymous_user_name')
 };
+const io = require('socket.io-client');
 
 @autobind
 class AnnotationService extends EventEmitter {
@@ -64,8 +63,12 @@ class AnnotationService extends EventEmitter {
         this._user = ANONYMOUS_USER;
         this.versionID = data.fileVersionID;
 
-        this.socket = io.connect(this._api, { query: `fileVersionID:${this.versionID}&headers:${this._headers}` });
+        this.socket = io.connect(this._api, {
+            secure: true,
+            query: `fileVersionID=${this.versionID}&headers=${this._headers}`
+        });
         this.socket.on('connect', () => {
+            console.log('connected!!!!')
             this.socket.on('message', (msg) => {
                 console.log(msg);
             });
@@ -85,6 +88,7 @@ class AnnotationService extends EventEmitter {
      */
     create(annotation) {
         return new Promise((resolve, reject) => {
+            if (this.socket.disconnected) { return; }
             this.socket.emit('create', {
                 method: 'POST',
                 headers: this._headers,
@@ -163,6 +167,7 @@ class AnnotationService extends EventEmitter {
      */
     delete(annotationID) {
         return new Promise((resolve, reject) => {
+            if (this.socket.disconnected) { return; }
             this.socket.emit('delete', `${this._api}/${annotationID}`, {
                 method: 'DELETE',
                 headers: this._headers
@@ -319,6 +324,7 @@ class AnnotationService extends EventEmitter {
      * @return {void}
      */
     readFromMarker(resolve, reject, fileVersionID, marker = null, limit = null) {
+        if (this.socket.disconnected) { return; }
         this.socket.emit('fetch')
         .then((response) => response.json())
         .then((data) => {

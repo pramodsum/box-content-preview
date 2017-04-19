@@ -38,7 +38,7 @@ const IS_SAFARI_CLASS = 'is-safari';
 const SCROLL_EVENT_THROTTLE_INTERVAL = 200;
 const SCROLL_END_TIMEOUT = Browser.isMobile() ? 500 : 250;
 
-const API_HOST = 'http://172.18.65.11:3000/';
+const API_HOST = 'https://172.18.65.11:3000/';
 
 @autobind
 class DocBaseViewer extends BaseViewer {
