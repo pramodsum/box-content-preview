@@ -294,6 +294,60 @@ class Annotator extends EventEmitter {
             return;
         }
 
+        service.addListener('onannotationcreate', (response) => {
+            if (response.type !== 'error' && response.id) {
+                // @TODO(tjin): Remove this when responseData has permissions
+                const tempData = response;
+                tempData.permissions = {
+                    can_edit: true,
+                    can_delete: true
+                };
+                const createdAnnotation = this._annotationService.createAnnotation(tempData);
+
+                // Set user if not set already
+                if (!this._user || this._user.id === '0') {
+                    this._user = createdAnnotation.user;
+                }
+
+                let foundThread = false;
+                Object.keys(this._threads).forEach((page) => {
+                    this._threads[page].forEach((thread) => {
+                        if (thread.threadID === createdAnnotation._threadID) {
+                            thread.saveAnnotationToThread(createdAnnotation, false);
+                            foundThread = true;
+                        }
+                    });
+                });
+
+                if (!foundThread) {
+                    const thread = this.createAnnotationThread([createdAnnotation], createdAnnotation._location, createdAnnotation._type);
+
+                    if (thread) {
+                        thread._state = 'active-hover';
+                        thread._dialog.setup(thread._annotations);
+                        thread.show();
+
+                        // Bind events on thread
+                        this.bindCustomListenersOnThread(thread);
+                    }
+                }
+            }
+        });
+
+        service.addListener('onannotationdelete', (data) => {
+            Object.keys(this._threads).forEach((page) => {
+                this._threads[page].forEach((thread) => {
+                    if (thread.threadID === data.threadID) {
+                        thread._annotations.forEach((annotation) => {
+                            if (annotation._annotationID === data.annotationID) {
+                                thread.deleteAnnotation(annotation._annotationID, false);
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
         /* istanbul ignore next */
         service.addListener('annotationerror', (data) => {
             let errorMessage = '';

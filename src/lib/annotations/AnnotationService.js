@@ -63,9 +63,10 @@ class AnnotationService extends EventEmitter {
         this._user = ANONYMOUS_USER;
         this.versionId = data.fileVersionID;
 
-        this.socket = io.connect('https://localhost:9001', {
+        this.socket = io.connect('https://172.18.65.11:9001', {
             query: `fileID=${this._fileId}&fileVersionID=${this.versionId}&token=${data.token}`
         });
+
         this.socket.on('connect', () => {
             this.socket.on('oncreate', (response) => {
                 const responseData = response.body;
@@ -122,6 +123,14 @@ class AnnotationService extends EventEmitter {
 
                     this.resolve(this._annotations);
                 }
+            });
+
+            this.socket.on('update:create', (response) => {
+                this.emit('onannotationcreate', response.body);
+            });
+
+            this.socket.on('update:delete', (response) => {
+                this.emit('onannotationdelete', response.body);
             });
 
             this.socket.on('error', (error) => {
@@ -192,7 +201,7 @@ class AnnotationService extends EventEmitter {
      * @param {string} annotationID - Id of annotation to delete
      * @return {Promise} Promise to delete annotation
      */
-    delete(annotationID) {
+    delete(annotationID, threadID) {
         if (this.socket.disconnected) { return null; }
 
         this.deletePromise = new Promise((success, failure) => {
@@ -200,7 +209,7 @@ class AnnotationService extends EventEmitter {
             this.reject = failure;
         });
 
-        this.socket.emit('delete', { annotationID });
+        this.socket.emit('delete', { annotationID, threadID });
         return this.deletePromise;
     }
 

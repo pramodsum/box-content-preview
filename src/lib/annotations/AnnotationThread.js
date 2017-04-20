@@ -127,7 +127,7 @@ class AnnotationThread extends EventEmitter {
      * @param {string} text - Text of annotation to save
      * @return {void}
      */
-    saveAnnotation(type, text) {
+    saveAnnotation(type, text, useServer = true) {
         const annotationData = this.createAnnotationData(type, text);
 
         // Save annotation on client
@@ -146,32 +146,34 @@ class AnnotationThread extends EventEmitter {
         // Changing state from pending
         this._state = constants.ANNOTATION_STATE_HOVER;
 
-        // Save annotation on server
-        this._annotationService.create(annotationData).then((savedAnnotation) => {
-            // If no temporary annotation is found, save to thread normally
-            const tempIdx = this._annotations.indexOf(tempAnnotation);
-            if (tempIdx === -1) {
-                this.saveAnnotationToThread(savedAnnotation);
-            }
+        if (useServer) {
+            // Save annotation on server
+            this._annotationService.create(annotationData).then((savedAnnotation) => {
+                // If no temporary annotation is found, save to thread normally
+                const tempIdx = this._annotations.indexOf(tempAnnotation);
+                if (tempIdx === -1) {
+                    this.saveAnnotationToThread(savedAnnotation);
+                }
 
-            // Add thread number to associated dialog and thread
-            this._thread = this._thread || savedAnnotation._thread;
-            this._dialog._element.dataset.threadNumber = this._thread;
+                // Add thread number to associated dialog and thread
+                this._thread = this._thread || savedAnnotation._thread;
+                this._dialog._element.dataset.threadNumber = this._thread;
 
-            // Otherwise, replace temporary annotation with annotation saved to server
-            this._annotations[tempIdx] = savedAnnotation;
+                // Otherwise, replace temporary annotation with annotation saved to server
+                this._annotations[tempIdx] = savedAnnotation;
 
-            if (this._dialog) {
-                this._dialog.addAnnotation(savedAnnotation);
-                this._dialog.removeAnnotation(tempAnnotationID);
-            }
-        }).catch(() => {
-            // Remove temporary annotation
-            this.deleteAnnotation(tempAnnotationID, /* useServer */ false);
+                if (this._dialog) {
+                    this._dialog.addAnnotation(savedAnnotation);
+                    this._dialog.removeAnnotation(tempAnnotationID);
+                }
+            }).catch(() => {
+                // Remove temporary annotation
+                this.deleteAnnotation(tempAnnotationID, /* useServer */ false);
 
-            // Broadcast error
-            this.emit('annotationcreateerror');
-        });
+                // Broadcast error
+                this.emit('annotationcreateerror');
+            });
+        }
     }
 
     /**
@@ -208,13 +210,13 @@ class AnnotationThread extends EventEmitter {
 
         // Delete annotation on server
         if (useServer) {
-            this._annotationService.delete(annotationID)
+            this._annotationService.delete(annotationID, annotation._threadID)
             .then(() => {
                 // Ensures that blank highlight comment is also deleted when removing
                 // the last comment on a highlight
                 canDeleteAnnotation = this._annotations.length > 0 && this._annotations[0].permissions && this._annotations[0].permissions.can_delete;
                 if (annotatorUtil.isPlainHighlight(this._annotations) && canDeleteAnnotation) {
-                    this._annotationService.delete(this._annotations[0].annotationID);
+                    this._annotationService.delete(this._annotations[0].annotationID, this._annotations[0]._threadID);
                 }
 
                 // Broadcast thread cleanup if needed
