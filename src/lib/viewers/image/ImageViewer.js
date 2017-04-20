@@ -15,7 +15,7 @@ const CSS_CLASS_IMAGE = 'bp-image';
 const IMAGE_PADDING = 15;
 const IMAGE_ZOOM_SCALE = 1.2;
 
-const API_HOST = 'https://172.18.65.11:3000/';
+const API_HOST = 'http://172.18.65.11:9001';
 
 @autobind
 class ImageViewer extends ImageBaseViewer {

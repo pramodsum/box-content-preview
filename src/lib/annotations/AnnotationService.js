@@ -63,14 +63,36 @@ class AnnotationService extends EventEmitter {
         this._user = ANONYMOUS_USER;
         this.versionID = data.fileVersionID;
 
-        this.socket = io.connect(this._api, {
-            secure: true,
-            query: `fileVersionID=${this.versionID}&headers=${this._headers}`
+        this.socket = io.connect('https://localhost:9001', {
+            query: `fileVersionID=${this.versionID}&token=${data.token}`
         });
         this.socket.on('connect', () => {
-            console.log('connected!!!!')
-            this.socket.on('message', (msg) => {
+            this.socket.on('oncreate', (msg) => {
                 console.log(msg);
+            });
+            this.socket.on('ondelete', (msg) => {
+                console.log(msg);
+            });
+            this.socket.on('onfetch', (response) => {
+                console.log(response);
+
+                const responseData = response;//.json();
+                if (responseData.type === 'error' || !Array.isArray(responseData.entries)) {
+                    console.log(new Error(`Could not read annotations from file version with ID ${this.versionID}`));
+                    this.emit('annotationerror', {
+                        reason: 'read'
+                    });
+                } else {
+                    responseData.entries.forEach((annotationData) => {
+                        this._annotations.push(this.createAnnotation(annotationData));
+                    });
+
+                    if (responseData.next_marker) {
+                        this.readFromMarker({}, {}, this.versionID, responseData.next_marker, null);
+                    } else {
+                        console.log(this._annotations);
+                    }
+                }
             });
         });
 
@@ -325,32 +347,7 @@ class AnnotationService extends EventEmitter {
      */
     readFromMarker(resolve, reject, fileVersionID, marker = null, limit = null) {
         if (this.socket.disconnected) { return; }
-        this.socket.emit('fetch')
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.type === 'error' || !Array.isArray(data.entries)) {
-                reject(new Error(`Could not read annotations from file version with ID ${fileVersionID}`));
-                this.emit('annotationerror', {
-                    reason: 'read'
-                });
-            } else {
-                data.entries.forEach((annotationData) => {
-                    this._annotations.push(this.createAnnotation(annotationData));
-                });
-
-                if (data.next_marker) {
-                    this.readFromMarker(resolve, reject, fileVersionID, data.next_marker, limit);
-                } else {
-                    resolve(this._annotations);
-                }
-            }
-        })
-        .catch(() => {
-            reject(new Error('Could not read annotations from file due to invalid or expired token'));
-            this.emit('annotationerror', {
-                reason: 'authorization'
-            });
-        });
+        this.socket.emit('fetch');
     }
 }
 export default AnnotationService;
