@@ -61,78 +61,17 @@ class AnnotationService extends EventEmitter {
         this._headers = getHeaders({}, data.token);
         this._canAnnotate = data.canAnnotate;
         this._user = ANONYMOUS_USER;
-        this.versionID = data.fileVersionID;
+        this.versionId = data.fileVersionID;
 
         this.socket = io.connect('https://localhost:9001', {
-            query: `fileVersionID=${this.versionID}&token=${data.token}`
+            query: `fileID=${this._fileId}&fileVersionID=${this.versionId}&token=${data.token}`
         });
         this.socket.on('connect', () => {
-            this.socket.on('oncreate', (msg) => {
-                console.log(msg);
-            });
-            this.socket.on('ondelete', (msg) => {
-                console.log(msg);
-            });
-            this.socket.on('onfetch', (response) => {
-                console.log(response);
-
-                const responseData = response;//.json();
-                if (responseData.type === 'error' || !Array.isArray(responseData.entries)) {
-                    console.log(new Error(`Could not read annotations from file version with ID ${this.versionID}`));
-                    this.emit('annotationerror', {
-                        reason: 'read'
-                    });
-                } else {
-                    responseData.entries.forEach((annotationData) => {
-                        this._annotations.push(this.createAnnotation(annotationData));
-                    });
-
-                    if (responseData.next_marker) {
-                        this.readFromMarker({}, {}, this.versionID, responseData.next_marker, null);
-                    } else {
-                        console.log(this._annotations);
-                    }
-                }
-            });
-        });
-
-        this.socket.on('disconnect', () => {
-            console.log('disconnecting!!');
-            this.socket.disconnect();
-        });
-    }
-
-    /**
-     * Create an annotation.
-     *
-     * @param {Annotation} annotation - Annotation to save
-     * @return {Promise} Promise that resolves with created annotation
-     */
-    create(annotation) {
-        return new Promise((resolve, reject) => {
-            if (this.socket.disconnected) { return; }
-            this.socket.emit('create', {
-                method: 'POST',
-                headers: this._headers,
-                body: JSON.stringify({
-                    item: {
-                        type: 'file_version',
-                        id: annotation.fileVersionID
-                    },
-                    details: {
-                        type: annotation.type,
-                        location: annotation.location,
-                        threadID: annotation.threadID
-                    },
-                    message: annotation.text,
-                    thread: annotation.thread
-                })
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.type !== 'error' && data.id) {
-                    // @TODO(tjin): Remove this when response has permissions
-                    const tempData = data;
+            this.socket.on('oncreate', (response) => {
+                const responseData = response.body;
+                if (responseData.type !== 'error' && responseData.id) {
+                    // @TODO(tjin): Remove this when responseData has permissions
+                    const tempData = responseData;
                     tempData.permissions = {
                         can_edit: true,
                         can_delete: true
@@ -144,22 +83,88 @@ class AnnotationService extends EventEmitter {
                         this._user = createdAnnotation.user;
                     }
 
-                    resolve(createdAnnotation);
+                    this.resolve(createdAnnotation);
                 } else {
-                    reject(new Error('Could not create annotation'));
+                    this.reject(new Error('Could not create annotation'));
                     this.emit('annotationerror', {
                         reason: 'create'
                     });
                 }
-            })
-            /* istanbul ignore next */
-            .catch(() => {
-                reject(new Error('Could not create annotation due to invalid or expired token'));
+            });
+
+            this.socket.on('ondelete', (response) => {
+                if (response.statusCode === 204) {
+                    this.resolve();
+                } else {
+                    this.reject(new Error('Could not delete annotation'));
+                    this.emit('annotationerror', {
+                        reason: 'delete'
+                    });
+                }
+            });
+
+            this.socket.on('onfetch', (response) => {
+                if (response.type === 'error' || !Array.isArray(response.entries)) {
+                    this.reject(new Error(`Could not read annotations from file version with ID ${this.versionID}`));
+                    this.emit('annotationerror', {
+                        reason: 'read'
+                    });
+                } else {
+                    response.entries.forEach((annotationData) => {
+                        const tempData = annotationData;
+                        tempData.permissions = {
+                            can_edit: true,
+                            can_delete: true
+                        };
+                        const createdAnnotation = this.createAnnotation(tempData);
+                        this._annotations.push(createdAnnotation);
+                    });
+
+                    this.resolve(this._annotations);
+                }
+            });
+
+            this.socket.on('error', (error) => {
                 this.emit('annotationerror', {
-                    reason: 'authorization'
+                    reason: error
                 });
             });
         });
+
+        this.socket.on('disconnect', () => {
+            this.socket.disconnect();
+        });
+    }
+
+    /**
+     * Create an annotation.
+     *
+     * @param {Annotation} annotation - Annotation to save
+     * @return {Promise} Promise that resolves with created annotation
+     */
+    create(annotation) {
+        if (this.socket.disconnected) { return null; }
+
+        this.createPromise = new Promise((success, failure) => {
+            this.resolve = success;
+            this.reject = failure;
+        });
+
+        this.socket.emit('create', {
+            item: {
+                type: 'file_version',
+                id: annotation.fileVersionID
+            },
+            details: {
+                type: annotation.type,
+                location: annotation.location,
+                threadID: annotation.threadID
+            },
+            message: annotation.text,
+            thread: annotation.thread
+        });
+
+        return this.createPromise;
     }
 
     /**
@@ -168,17 +173,17 @@ class AnnotationService extends EventEmitter {
      * @param {string} fileVersionID - File version ID to fetch annotations for
      * @return {Promise} Promise that resolves with fetched annotations
      */
-    read(fileVersionID) {
+    read() {
+        if (this.socket.disconnected) { return null; }
+
         this._annotations = [];
-        let resolve;
-        let reject;
-        const promise = new Promise((success, failure) => {
-            resolve = success;
-            reject = failure;
+        this.fetchPromise = new Promise((success, failure) => {
+            this.resolve = success;
+            this.reject = failure;
         });
 
-        this.readFromMarker(resolve, reject, fileVersionID);
-        return promise;
+        this.socket.emit('fetch');
+        return this.fetchPromise;
     }
 
     /**
@@ -188,30 +193,15 @@ class AnnotationService extends EventEmitter {
      * @return {Promise} Promise to delete annotation
      */
     delete(annotationID) {
-        return new Promise((resolve, reject) => {
-            if (this.socket.disconnected) { return; }
-            this.socket.emit('delete', `${this._api}/${annotationID}`, {
-                method: 'DELETE',
-                headers: this._headers
-            })
-            .then((response) => {
-                if (response.status === 204) {
-                    resolve();
-                } else {
-                    reject(new Error(`Could not delete annotation with ID ${annotationID}`));
-                    this.emit('annotationerror', {
-                        reason: 'delete'
-                    });
-                }
-            })
-            /* istanbul ignore next */
-            .catch(() => {
-                reject(new Error('Could not delete annotation due to invalid or expired token'));
-                this.emit('annotationerror', {
-                    reason: 'authorization'
-                });
-            });
+        if (this.socket.disconnected) { return null; }
+
+        this.deletePromise = new Promise((success, failure) => {
+            this.resolve = success;
+            this.reject = failure;
         });
+
+        this.socket.emit('delete', { annotationID });
+        return this.deletePromise;
     }
 
     /**
@@ -333,21 +323,6 @@ class AnnotationService extends EventEmitter {
         }
 
         return apiUrl;
-    }
-
-    /**
-     * Reads annotations from file version ID starting at a marker. The default
-     * limit is 100 annotations per API call.
-     *
-     * @private
-     * @param {string} fileVersionID - File version ID to fetch annotations for
-     * @param {string} marker - marker to use if there are more than limit annotations
-     * @param {int} limit - the amout of annotations the API will return per call
-     * @return {void}
-     */
-    readFromMarker(resolve, reject, fileVersionID, marker = null, limit = null) {
-        if (this.socket.disconnected) { return; }
-        this.socket.emit('fetch');
     }
 }
 export default AnnotationService;
