@@ -399,6 +399,12 @@ function isThreadInHoverState(thread) {
             this.annotatedElement.addEventListener('contextmenu', this.highlightMousedownHandler);
             this.annotatedElement.addEventListener('mousemove', this.getHighlightMouseMoveHandler());
         }
+
+        if (this.isMobile) {
+            document.addEventListener('selectionchange', (event) => {
+                this.highlightCreateHandler(event);
+            });
+        }
     }
 
     /**
@@ -674,7 +680,7 @@ function isThreadInHoverState(thread) {
 
         // Only filter through highlight threads on the current page
         // Reset active highlight threads before creating new highlight
-        const { pageEl } = annotatorUtil.getPageInfo(event.target);
+        const { pageEl } = annotatorUtil.getPageInfo(selection.anchorNode);
 
         if (!pageEl) {
             return;
