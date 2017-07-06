@@ -674,12 +674,11 @@ function isThreadInHoverState(thread) {
         event.stopPropagation();
 
         const selection = window.getSelection();
-        if (selection.rangeCount <= 0 || selection.isCollapsed) {
+        if (!this.isValidSelection(selection)) {
             return;
         }
 
-        // Only filter through highlight threads on the current page
-        // Reset active highlight threads before creating new highlight
+        // Select page of first node selected
         const { pageEl } = annotatorUtil.getPageInfo(selection.anchorNode);
 
         if (!pageEl) {
@@ -705,6 +704,21 @@ function isThreadInHoverState(thread) {
         }
 
         this.lastHighlightEvent = event;
+    }
+
+    /**
+     * Check whether a selection is valid for creating a highlight from.
+     *
+     * @param {Selection} selection The selection object to test
+     * @return {boolean} True if the selection is valid for creating a highlight from
+     */
+    isValidSelection(selection) {
+        const isInvalid =
+            selection.rangeCount <= 0 || // Check for an invalid range triggering selection
+            selection.isCollapsed || // Make sure the text is non-collapsed(or hidden)
+            selection.toString() === ''; // Empty can occur if there is conflict with element layout
+
+        return !isInvalid;
     }
 
     /**
