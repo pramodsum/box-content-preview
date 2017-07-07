@@ -88,6 +88,13 @@ function isThreadInHoverState(thread) {
     lastHighlightEvent;
 
     /**
+     * Container element for mobile annotation dialogs.
+     *
+     * @property {HTMLElement}
+     */
+    mobileDialogParentEl;
+
+    /**
      * Creates and mananges plain highlight and comment highlight and point annotations
      * on document files.
      *
@@ -102,8 +109,9 @@ function isThreadInHoverState(thread) {
         this.highlightCurrentSelection = this.highlightCurrentSelection.bind(this);
         this.createHighlightThread = this.createHighlightThread.bind(this);
         this.createPlainHighlight = this.createPlainHighlight.bind(this);
+        this.highlightCreateHandler = this.highlightCreateHandler.bind(this);
 
-        this.createHighlightDialog = new CreateHighlightDialog();
+        this.createHighlightDialog = new CreateHighlightDialog(undefined, this.isMobile);
         this.createHighlightDialog.addListener(CreateEvents.plain, this.createPlainHighlight);
 
         this.createHighlightDialog.addListener(CreateEvents.comment, this.highlightCurrentSelection);
@@ -398,12 +406,9 @@ function isThreadInHoverState(thread) {
             this.annotatedElement.addEventListener('mousedown', this.highlightMousedownHandler);
             this.annotatedElement.addEventListener('contextmenu', this.highlightMousedownHandler);
             this.annotatedElement.addEventListener('mousemove', this.getHighlightMouseMoveHandler());
-        }
-
-        if (this.isMobile) {
-            document.addEventListener('selectionchange', (event) => {
-                this.highlightCreateHandler(event);
-            });
+            if (this.isMobile) {
+                document.addEventListener('selectionchange', this.highlightCreateHandler);
+            }
         }
     }
 
@@ -422,11 +427,14 @@ function isThreadInHoverState(thread) {
             this.annotatedElement.removeEventListener('mousedown', this.highlightMousedownHandler);
             this.annotatedElement.removeEventListener('contextmenu', this.highlightMousedownHandler);
             this.annotatedElement.removeEventListener('mousemove', this.getHighlightMouseMoveHandler());
-
-            if (this.highlightThrottleHandle) {
-                cancelAnimationFrame(this.highlightThrottleHandle);
-                this.highlightThrottleHandle = null;
+            if (this.isMobile) {
+                document.removeEventListener('selectionchange', this.highlightCreateHandler);
             }
+        }
+
+        if (this.highlightThrottleHandle) {
+            cancelAnimationFrame(this.highlightThrottleHandle);
+            this.highlightThrottleHandle = null;
         }
     }
 
@@ -697,8 +705,10 @@ function isThreadInHoverState(thread) {
         const pageDimensions = pageEl.getBoundingClientRect();
         const pageLeft = pageDimensions.left;
         const pageTop = pageDimensions.top + constants.PAGE_PADDING_TOP;
+        const dialogParentEl = this.isMobile ? this.container : pageEl;
 
-        this.createHighlightDialog.show(pageEl);
+        this.createHighlightDialog.show(dialogParentEl);
+
         if (!this.isMobile) {
             this.createHighlightDialog.setPosition(right - pageLeft, bottom - pageTop);
         }

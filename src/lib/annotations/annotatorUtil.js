@@ -18,6 +18,7 @@ const THREAD_PARAMS = [
 
 /**
  * Finds the closest ancestor DOM element with the specified class.
+ *
  * @param {HTMLElement} element - Element to search ancestors of
  * @param {string} className - Class name to query
  * @return {HTMLElement|null} Closest ancestor with given class or null
@@ -33,10 +34,11 @@ export function findClosestElWithClass(element, className) {
 }
 
 /**
-* Returns the page element and page number that the element is on.
-* @param {HTMLElement} element - Element to find page and page number for
-* @return {Object} Page element/page number if found or null/-1 if not
-*/
+ * Returns the page element and page number that the element is on.
+ *
+ * @param {HTMLElement} element - Element to find page and page number for
+ * @return {Object} Page element/page number if found or null/-1 if not
+ */
 export function getPageInfo(element) {
     const pageEl = findClosestElWithClass(element, 'page') || null;
     let page = -1;
@@ -52,6 +54,7 @@ export function getPageInfo(element) {
  * Finds the closest element with a data type and returns that data type. If
  * an attributeName is provided, search for that data atttribute instead of
  * data type.
+ *
  * @param {HTMLElement} element - Element to find closest data type for
  * @param {string} [attributeName] - Optional different data attribute to search
  * for
@@ -71,6 +74,7 @@ export function findClosestDataType(element, attributeName) {
 
 /**
  * Shows the specified element or element with specified selector.
+ *
  * @param {HTMLElement|string} elementOrSelector - Element or CSS selector
  * @return {void}
  */
@@ -87,6 +91,7 @@ export function showElement(elementOrSelector) {
 
 /**
  * Hides the specified element or element with specified selector.
+ *
  * @param {HTMLElement|string} elementOrSelector - Element or CSS selector
  * @return {void}
  */
@@ -103,6 +108,7 @@ export function hideElement(elementOrSelector) {
 
 /**
  * Shows the specified element or element with specified selector.
+ *
  * @param {HTMLElement|string} elementOrSelector - Element or CSS selector
  * @return {void}
  */
@@ -119,7 +125,8 @@ export function showInvisibleElement(elementOrSelector) {
 
 /**
  * Hides the specified element or element with specified selector. The element
- * will still take up DOM space but not be visible in the UI
+ * will still take up DOM space but not be visible in the UI.
+ *
  * @param {HTMLElement|string} elementOrSelector - Element or CSS selector
  * @return {void}
  */
@@ -137,8 +144,9 @@ export function hideElementVisibility(elementOrSelector) {
 /**
  * Reset textarea element - clears value, resets styles, and remove active
  * state.
+ *
  * @param {HTMLElement} element - Textarea to reset
- * @param {Boolean} clearText - Whether or not text in text area should be cleared
+ * @param {boolean} clearText - Whether or not text in text area should be cleared
  * @return {void}
  */
 export function resetTextarea(element, clearText) {
@@ -158,7 +166,9 @@ export function resetTextarea(element, clearText) {
 
 /**
  * Checks whether element is fully in viewport.
- * @return {boolean} Whether element is fully in viewport
+ *
+ * @param {HTMLElement} element - The element to check and see if it lies in the viewport
+ * @return {boolean} Whether the element is fully in viewport
  */
 export function isElementInViewport(element) {
     const dimensions = element.getBoundingClientRect();

@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import { ICON_HIGHLIGHT, ICON_HIGHLIGHT_COMMENT } from '../../icons/icons';
 import CommentBox from '../CommentBox';
 import { hideElement, showElement } from '../annotatorUtil';
+import { CLASS_ANIMATE_DIALOG } from '../annotationConstants';
 
 const CLASS_CREATE_DIALOG = 'bp-create-annotation-dialog';
 const TITLE_HIGHLIGHT_TOGGLE = __('annotation_highlight_toggle');
@@ -88,14 +89,22 @@ class CreateHighlightDialog extends EventEmitter {
     };
 
     /**
+     * Whether or not we're on a mobile device.
+     *
+     * @property {boolean}
+     */
+    isMobile;
+
+    /**
      * A dialog used to create plain and comment highlights.
      * 
      * [constructor]
      */
-    constructor(parentEl) {
+    constructor(parentEl, isMobile = false) {
         super();
 
         this.parentEl = parentEl;
+        this.isMobile = isMobile;
 
         // Explicit scope binding for event listeners
         this.onHighlightClick = this.onHighlightClick.bind(this);
@@ -152,6 +161,12 @@ class CreateHighlightDialog extends EventEmitter {
         }
 
         this.setButtonVisibility(true);
+
+        // Because annotation dialog parent will not be visible.
+        if (this.isMobile) {
+            this.containerEl.classList.add(CLASS_ANIMATE_DIALOG);
+        }
+
         showElement(this.containerEl);
     }
 
@@ -165,7 +180,12 @@ class CreateHighlightDialog extends EventEmitter {
             return;
         }
 
+        if (this.isMobile) {
+            this.containerEl.classList.remove(CLASS_ANIMATE_DIALOG);
+        }
+
         hideElement(this.containerEl);
+
         this.commentBox.hide();
         this.commentBox.clear();
     }
@@ -213,6 +233,10 @@ class CreateHighlightDialog extends EventEmitter {
      * @return {void}
      */
     updatePosition() {
+        if (this.isMobile) {
+            return;
+        }
+
         // Plus 1 pixel for caret
         this.containerEl.style.left = `${this.position.x - 1 - this.containerEl.clientWidth / 2}px`;
         // Plus 5 pixels for caret
@@ -301,6 +325,12 @@ class CreateHighlightDialog extends EventEmitter {
         const highlightDialogEl = document.createElement('div');
         highlightDialogEl.classList.add(CLASS_CREATE_DIALOG);
         highlightDialogEl.innerHTML = CREATE_HIGHLIGHT_DIALOG_TEMPLATE;
+        // Get rid of the caret
+        if (this.isMobile) {
+            highlightDialogEl.classList.add('bp-mobile-annotation-dialog');
+            highlightDialogEl.classList.add('bp-annotation-dialog');
+            highlightDialogEl.querySelector('.bp-annotation-caret').remove();
+        }
 
         const containerEl = highlightDialogEl.querySelector('.bp-annotation-highlight-dialog');
 

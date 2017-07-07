@@ -6,8 +6,6 @@ import { CLASS_ACTIVE, CLASS_HIDDEN } from '../constants';
 import { decodeKeydown } from '../util';
 import { ICON_CLOSE, ICON_DELETE } from '../icons/icons';
 
-const CLASS_ANIMATE_DIALOG = 'bp-animate-show-dialog';
-
 @autobind class AnnotationDialog extends EventEmitter {
     //--------------------------------------------------------------------------
     // Typedef
@@ -68,7 +66,7 @@ const CLASS_ANIMATE_DIALOG = 'bp-animate-show-dialog';
     show() {
         // Populate mobile annotations dialog with annotations information
         if (this.isMobile) {
-            this.element = document.querySelector(`.${constants.CLASS_MOBILE_ANNOTATION_DIALOG}`);
+            // this.element = document.querySelector(`.${constants.CLASS_MOBILE_ANNOTATION_DIALOG}`);
             annotatorUtil.showElement(this.element);
             this.element.appendChild(this.dialogEl);
 
@@ -82,7 +80,7 @@ const CLASS_ANIMATE_DIALOG = 'bp-animate-show-dialog';
             const dialogCloseButtonEl = this.element.querySelector('.bp-annotation-dialog-close');
             dialogCloseButtonEl.addEventListener('click', this.hideMobileDialog);
 
-            this.element.classList.add(CLASS_ANIMATE_DIALOG);
+            this.element.classList.add(constants.CLASS_ANIMATE_DIALOG);
 
             this.bindDOMListeners();
         }
@@ -137,7 +135,7 @@ const CLASS_ANIMATE_DIALOG = 'bp-animate-show-dialog';
             return;
         }
 
-        this.element.classList.remove(CLASS_ANIMATE_DIALOG);
+        this.element.classList.remove(constants.CLASS_ANIMATE_DIALOG);
 
         // Clear annotations from dialog
         this.element.innerHTML = `

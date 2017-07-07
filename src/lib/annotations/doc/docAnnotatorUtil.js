@@ -114,9 +114,7 @@ export function isPointInPolyOpt(poly, x, y) {
 /* istanbul ignore next */
 export function getHighlightAndHighlightEls(highlighter, pageEl) {
     const highlight = highlighter.highlights[0];
-    // // Only grab highlights on the text layer
-    const textLayer = pageEl.querySelector('.textLayer');
-    const highlightEls = [].slice.call(textLayer.querySelectorAll('.rangy-highlight'), 0).filter((element) => {
+    const highlightEls = [].slice.call(pageEl.querySelectorAll('.rangy-highlight'), 0).filter((element) => {
         return element.tagName && element.tagName === 'SPAN' && element.textContent.trim() !== '';
     });
 
