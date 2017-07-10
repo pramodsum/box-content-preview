@@ -17,6 +17,7 @@ import * as docAnnotatorUtil from './docAnnotatorUtil';
 const MOUSEMOVE_THROTTLE_MS = 50;
 const HOVER_TIMEOUT_MS = 75;
 const MOUSE_MOVE_MIN_DISTANCE = 5;
+const CLASS_RANGY_HIGHLIGHT = 'rangy-highlight';
 
 /**
  * For filtering out and only showing the first thread in a list of threads.
@@ -216,10 +217,12 @@ function isThreadInHoverState(thread) {
             }
 
             // Get correct page
-            let { pageEl, page } = annotatorUtil.getPageInfo(event.target);
+            let { pageEl, page } = annotatorUtil.getPageInfo(window.getSelection().anchorNode);
             if (page === -1) {
                 // The ( .. ) around assignment is required syntax
-                ({ pageEl, page } = annotatorUtil.getPageInfo(window.getSelection().anchorNode));
+                ({ pageEl, page } = annotatorUtil.getPageInfo(
+                    this.annotatedElement.querySelector(`.${CLASS_RANGY_HIGHLIGHT}`)
+                ));
             }
 
             // Use highlight module to calculate quad points
@@ -384,7 +387,7 @@ function isThreadInHoverState(thread) {
         // Init rangy and rangy highlight
         this.highlighter = rangy.createHighlighter();
         this.highlighter.addClassApplier(
-            rangy.createClassApplier('rangy-highlight', {
+            rangy.createClassApplier(CLASS_RANGY_HIGHLIGHT, {
                 ignoreWhiteSpace: true,
                 tagNames: ['span', 'a']
             })

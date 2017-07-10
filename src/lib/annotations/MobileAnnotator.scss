@@ -1,5 +1,11 @@
 $tablet: "(min-width: 768px)";
 
+@mixin border-top-bottom {
+    border-color: #ccc;
+    border-style: solid;
+    border-width: 1px 0;
+}
+
 .bp-mobile-annotation-dialog {
     background: white;
     border-top: 0;
@@ -32,11 +38,17 @@ $tablet: "(min-width: 768px)";
     &.bp-create-annotation-dialog {
         bottom: 0;
         height: auto;
+        @include border-top-bottom;
 
         &.bp-animate-show-dialog {
             animation: show-create-dialog-small;
             animation-duration: .2s;
             animation-fill-mode: forwards;
+        }
+
+        .bp-annotation-highlight-dialog {
+            position: absolute;
+            bottom: 0;
         }
     }
 }
@@ -57,7 +69,7 @@ $tablet: "(min-width: 768px)";
     }
 
     100% {
-        bottom: 56px;
+        bottom: 0px;
     }
 }
 
@@ -83,10 +95,6 @@ $tablet: "(min-width: 768px)";
 
 .bp-mobile-annotation-dialog.bp-annotation-dialog,
 .bp-mobile-annotation-dialog.bp-temp-annotation-dialog {
-    border-color: #ccc;
-    border-style: solid;
-    border-width: 0 1px;
-
     .annotation-container {
         background-color: $white;
         border: 0;
@@ -106,6 +114,7 @@ $tablet: "(min-width: 768px)";
         height: 48px;
         justify-content: space-between;
         padding: 0;
+        @include border-top-bottom;
     }
 
     .bp-annotation-dialog-close {
