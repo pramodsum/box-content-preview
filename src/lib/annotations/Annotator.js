@@ -101,6 +101,7 @@ import './Annotator.scss';
         mobileDialogEl.classList.add(constants.CLASS_MOBILE_ANNOTATION_DIALOG);
         mobileDialogEl.classList.add(constants.CLASS_ANNOTATION_DIALOG);
         mobileDialogEl.classList.add(CLASS_HIDDEN);
+        mobileDialogEl.id = constants.ID_MOBILE_ANNOTATION_DIALOG;
 
         mobileDialogEl.innerHTML = `
             <div class="bp-annotation-mobile-header">

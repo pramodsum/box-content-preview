@@ -44,3 +44,5 @@ export const HIGHLIGHT_ERASE_FILL_STYLE = 'rgba(255, 245, 132, 1)';
 
 export const PAGE_PADDING_TOP = 15;
 export const PAGE_PADDING_BOTTOM = 15;
+
+export const ID_MOBILE_ANNOTATION_DIALOG = 'mobile-annotation-dialog';
