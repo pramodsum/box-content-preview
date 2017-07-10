@@ -35,8 +35,10 @@ const PAGE_PADDING_TOP = 15;
             ]);
             annotatorUtil.showElement(highlightLabelEl);
 
-            // Only reposition if mouse is still hovering over the dialog
-            this.position();
+            // Only reposition if mouse is still hovering over the dialog and not mobile
+            if (!this.isMobile) {
+                this.position();
+            }
         }
 
         super.addAnnotation(annotation);
@@ -72,7 +74,6 @@ const PAGE_PADDING_TOP = 15;
         const pageHeight = pageDimensions.height - PAGE_PADDING_TOP - PAGE_PADDING_BOTTOM;
 
         const [browserX, browserY] = this.getScaledPDFCoordinates(pageDimensions, pageHeight);
-
         pageEl.appendChild(this.element);
 
         const highlightDialogWidth = this.getDialogWidth();
@@ -142,7 +143,9 @@ const PAGE_PADDING_TOP = 15;
         }
 
         // Reposition dialog
-        this.position();
+        if (!this.isMobile) {
+            this.position();
+        }
     }
 
     /**

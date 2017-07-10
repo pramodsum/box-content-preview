@@ -67,7 +67,6 @@ import { ICON_CLOSE, ICON_DELETE } from '../icons/icons';
         // Populate mobile annotations dialog with annotations information
         if (this.isMobile) {
             this.element = document.body.querySelector(`#${constants.ID_MOBILE_ANNOTATION_DIALOG}`);
-            console.log(this.element);
             annotatorUtil.showElement(this.element);
             this.element.appendChild(this.dialogEl);
 
