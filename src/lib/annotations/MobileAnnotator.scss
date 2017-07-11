@@ -1,7 +1,8 @@
 $tablet: "(min-width: 768px)";
+$three-c: #ccc;
 
 @mixin border-top-bottom {
-    border-color: #ccc;
+    border-color: $three-c;
     border-style: solid;
     border-width: 1px 0;
 }
@@ -23,7 +24,7 @@ $tablet: "(min-width: 768px)";
                 animation: show-dialog-tablet;
                 animation-duration: .2s;
                 animation-fill-mode: forwards;
-                border-left: solid 1px #ccc;
+                border-left: solid 1px $three-c;
                 width: 450px;
             }
         }
@@ -38,7 +39,6 @@ $tablet: "(min-width: 768px)";
     &.bp-create-annotation-dialog {
         bottom: 0;
         height: auto;
-        @include border-top-bottom;
 
         &.bp-animate-show-dialog {
             animation: show-create-dialog-small;
@@ -49,6 +49,7 @@ $tablet: "(min-width: 768px)";
         .bp-annotation-highlight-dialog {
             position: absolute;
             bottom: 0;
+            @include border-top-bottom;
         }
     }
 }
@@ -185,7 +186,7 @@ $tablet: "(min-width: 768px)";
 
 /* Highlight dialog */
 .bp-mobile-annotation-dialog.bp-plain-highlight {
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid $three-c;
     height: 47px; // includes mobile header & highlight dialog
     top: auto;
 }
@@ -201,9 +202,15 @@ $tablet: "(min-width: 768px)";
     text-align: center;
     z-index: 9999;
 
-    .bp-annotations-highlight-btns button {
-        width: 50%;
-        float: left;
+    .bp-annotations-highlight-btns {
+        button {
+            width: 50%;
+            float: left;
+        }
+
+        button:first-child {
+             border-right: 1px solid $three-c;
+        }
     }
 
     &.cannot-annotate {
