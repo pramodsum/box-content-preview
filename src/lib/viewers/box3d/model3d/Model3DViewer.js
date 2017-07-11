@@ -23,6 +23,7 @@ import './Model3D.scss';
 const DEFAULT_AXIS_UP = '+Y';
 const DEFAULT_AXIS_FORWARD = '+Z';
 const DEFAULT_RENDER_GRID = true;
+const LOAD_TIMEOUT = 180000; // 3 minutes
 
 /**
  * Model3d
@@ -30,6 +31,15 @@ const DEFAULT_RENDER_GRID = true;
  * @class
  */
 @autobind class Model3DViewer extends Box3DViewer {
+    /** @property {Object[]} - List of Box3D instances added to the scene */
+    instances = [];
+
+    /** @property {Object} - Tracks up and forward axes for the model alignment in the scene */
+    axes = {
+        up: null,
+        forward: null
+    };
+
     /**
      * @inheritdoc
      */
@@ -39,13 +49,7 @@ const DEFAULT_RENDER_GRID = true;
 
         this.wrapperEl.classList.add(CSS_CLASS_INVISIBLE);
 
-        this.loadTimeout = 180000; // 3 minutes
-        this.instances = [];
-        this.assets = [];
-        this.axes = {
-            up: null,
-            forward: null
-        };
+        this.loadTimeout = LOAD_TIMEOUT;
     }
 
     /**
@@ -240,7 +244,8 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Handle error triggered by metadata load issues
-     * @param err {Error} The error thrown when trying to load metadata
+     *
+     * @param {Error} err - The error thrown when trying to load metadata
      * @return {void}
      */
     onMetadataError(err) {
@@ -254,6 +259,7 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Populate control bar with animation playback UI.
+     *
      * @method populateAnimationControls
      * @private
      * @return {void}
@@ -303,6 +309,7 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Show the preview wrapper container element
+     *
      * @return {void}
      */
     showWrapper() {
@@ -331,7 +338,8 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Handle set render mode event
-     * @param  {string} mode The selected render mode string
+     *
+     * @param {string} mode - The selected render mode string
      * @return {void}
      */
     handleSetRenderMode(mode = 'Lit') {
@@ -341,6 +349,7 @@ const DEFAULT_RENDER_GRID = true;
     /**
      * Show, hide or toggle the 'helpers' in the scene. These include the grid display
      * and axis markings.
+     *
      * @method handleToggleHelpers
      * @private
      * @param {boolean} show - True or false to show or hide. If not specified, the helpers will be toggled.
@@ -352,7 +361,9 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Handle setting camera projection
+     *
      * @private
+     * @param {string} projection - Camera projection
      * @return {void}
      */
     handleSetCameraProjection(projection) {
@@ -361,7 +372,9 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Handle setting quality level for rendering
+     *
      * @private
+     * @param {string} level - Quality level
      * @return {void}
      */
     handleSetQualityLevel(level) {
@@ -370,6 +383,7 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Handle setting skeleton visibility.
+     *
      * @private
      * @param {boolean} visible - Indicates whether or not skeletons are visible.
      * @return {void}
@@ -380,6 +394,7 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Handle setting wireframe visibility.
+     *
      * @private
      * @param {boolean} visible - Indicates whether or not wireframes are visible.
      * @return {void}
@@ -390,6 +405,7 @@ const DEFAULT_RENDER_GRID = true;
 
     /**
      * Handle setting grid visibility.
+     *
      * @private
      * @param {boolean} visible - Indicates whether or not the grid is visible.
      * @return {void}

@@ -159,7 +159,6 @@ import { ICON_CLOSE, ICON_DELETE } from '../icons/icons';
     /**
      * Hides the dialog.
      *
-     * @param {boolean} [noDelay] - Whether or not to have a timeout delay
      * @return {void}
      */
     hide() {
@@ -207,7 +206,7 @@ import { ICON_CLOSE, ICON_DELETE } from '../icons/icons';
     /**
      * Posts an annotation in the dialog.
      *
-     * @public
+     * @param {string} [textInput] - Annotation text to post
      * @return {void}
      */
     postAnnotation(textInput) {
@@ -317,7 +316,7 @@ import { ICON_CLOSE, ICON_DELETE } from '../icons/icons';
 
         const key = decodeKeydown(event);
         if (key === 'Escape') {
-            this.hide(); // hide without delay
+            this.hide();
         } else {
             const dataType = annotatorUtil.findClosestDataType(event.target);
             if (dataType === 'reply-textarea') {

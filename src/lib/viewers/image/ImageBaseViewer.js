@@ -13,6 +13,7 @@ const CSS_CLASS_PANNABLE = 'pannable';
 @autobind class ImageBaseViewer extends BaseViewer {
     /**
      * [destructor]
+     *
      * @return {void}
      */
     destroy() {
@@ -218,6 +219,7 @@ const CSS_CLASS_PANNABLE = 'pannable';
      * Handles image element loading errors.
      *
      * @private
+     * @param {Error} err - Error to handle
      * @return {void}
      */
     errorHandler = (err) => {
@@ -314,10 +316,6 @@ const CSS_CLASS_PANNABLE = 'pannable';
         event.preventDefault();
         event.stopPropagation();
     }
-
-    //----------------------------------------------------------------------------------------------
-    // Annotations. TODO(jholdstock|spramod) Refactor out all annotations code from viewers
-    //----------------------------------------------------------------------------------------------
 
     /**
      * Disables viewer controls

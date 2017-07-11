@@ -6,7 +6,6 @@ import Box3DRenderer from './Box3DRenderer';
 import Browser from '../../Browser';
 import Notification from '../../Notification';
 import { get } from '../../util';
-import { showLoadingIndicator } from '../../ui';
 import {
     CSS_CLASS_BOX3D,
     EVENT_ERROR,
@@ -34,6 +33,15 @@ const CLASS_VR_ENABLED = 'vr-enabled';
  * @class
  */
 @autobind class Box3DViewer extends BaseViewer {
+    /** @property {Box3DRenderer} - Box3DRenderer instance. Renders the 3D scene */
+    renderer;
+
+    /** @property {HTMLElement} - Parent element for nesting the 3D scene and notifications in */
+    wrapperEl;
+
+    /** @property {Notification} - Used to notify users of WebGL context issues */
+    contextNotification;
+
     /**
      * @inheritdoc
      */
@@ -44,8 +52,6 @@ const CLASS_VR_ENABLED = 'vr-enabled';
         super.setup();
 
         this.renderer = null;
-        this.controls = null;
-        this.destroyed = false;
 
         this.wrapperEl = this.containerEl.appendChild(document.createElement('div'));
         this.wrapperEl.className = CSS_CLASS_BOX3D;
@@ -230,7 +236,7 @@ const CLASS_VR_ENABLED = 'vr-enabled';
         this.detachEventHandlers();
         this.contextNotification.show('WebGL Context Restored');
         this.emit('progressstart');
-        showLoadingIndicator();
+        this.previewUI.showLoadingIndicator();
         this.postLoad();
     }
 
@@ -322,7 +328,7 @@ const CLASS_VR_ENABLED = 'vr-enabled';
     /**
      * Handle error events and emit a message
      *
-     * @param {Error} The - error that caused this to be triggered. To be emitted.
+     * @param {Error} error - The error that caused this to be triggered. To be emitted.
      * @return {void}
      */
     handleError(error) {

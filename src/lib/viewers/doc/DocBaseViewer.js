@@ -2,7 +2,6 @@ import autobind from 'autobind-decorator';
 import throttle from 'lodash.throttle';
 import BaseViewer from '../BaseViewer';
 import Browser from '../../Browser';
-import cache from '../../Cache';
 import Controls from '../../Controls';
 import DocFindBar from './DocFindBar';
 import fullscreen from '../../Fullscreen';
@@ -323,8 +322,8 @@ const MOBILE_MAX_CANVAS_SIZE = 2949120; // ~3MP 1920x1536
     getCachedPage() {
         let page = 1;
 
-        if (cache.has(CURRENT_PAGE_MAP_KEY)) {
-            const currentPageMap = cache.get(CURRENT_PAGE_MAP_KEY);
+        if (this.cache.has(CURRENT_PAGE_MAP_KEY)) {
+            const currentPageMap = this.cache.get(CURRENT_PAGE_MAP_KEY);
             page = currentPageMap[this.options.file.id] || page;
         }
 
@@ -340,12 +339,12 @@ const MOBILE_MAX_CANVAS_SIZE = 2949120; // ~3MP 1920x1536
      */
     cachePage(page) {
         let currentPageMap = {};
-        if (cache.has(CURRENT_PAGE_MAP_KEY)) {
-            currentPageMap = cache.get(CURRENT_PAGE_MAP_KEY);
+        if (this.cache.has(CURRENT_PAGE_MAP_KEY)) {
+            currentPageMap = this.cache.get(CURRENT_PAGE_MAP_KEY);
         }
 
         currentPageMap[this.options.file.id] = page;
-        cache.set(CURRENT_PAGE_MAP_KEY, currentPageMap, true /* useLocalStorage */);
+        this.cache.set(CURRENT_PAGE_MAP_KEY, currentPageMap, true /* useLocalStorage */);
     }
 
     /**
@@ -706,6 +705,8 @@ const MOBILE_MAX_CANVAS_SIZE = 2949120; // ~3MP 1920x1536
 
         // Keep reference to page number input and current page elements
         this.pageNumInputEl = pageNumEl.querySelector('.bp-doc-page-num-input');
+        this.pageNumInputEl.setAttribute('max', this.pdfViewer.pagesCount);
+
         this.currentPageEl = pageNumEl.querySelector('.bp-doc-current-page');
     }
 
@@ -957,13 +958,14 @@ const MOBILE_MAX_CANVAS_SIZE = 2949120; // ~3MP 1920x1536
 
         switch (key) {
             case 'Enter':
+            case 'Tab':
+                // The keycode of the 'next' key on Android Chrome is 9, which maps to 'Tab'.
+                this.docEl.focus();
                 // We normally trigger the blur handler by blurring the input
                 // field, but this doesn't work for IE in fullscreen. For IE,
                 // we blur the page behind the controls - this unfortunately
                 // is an IE-only solution that doesn't work with other browsers
-                if (Browser.getName() === 'Explorer') {
-                    this.docEl.focus();
-                } else {
+                if (Browser.getName() !== 'Explorer') {
                     event.target.blur();
                 }
 

@@ -185,6 +185,7 @@ export function isElementInViewport(element) {
  * Returns avatar image HTML for annotation dialog. This will be either an
  * image with the supplied avatar URL as a source if there is a URL passed in
  * or one generated using the initials of the annotator.
+ *
  * @param {string} avatarUrl - URL of avatar photo
  * @param {string} userId - User ID of annotator
  * @param {string} userName - Username of annotator
@@ -207,6 +208,7 @@ export function getAvatarHtml(avatarUrl, userId, userName) {
 
 /**
  * Returns zoom scale of annotated element.
+ *
  * @param {HTMLElement} annotatedElement - HTML element being annotated on
  * @return {number} Zoom scale
  */
@@ -220,8 +222,9 @@ export function getScale(annotatedElement) {
 
 /**
  * Whether or not a highlight annotation has comments or is a plain highlight
- * @param {Annotation[]} Annotations - in highlight thread
- * @return {Boolean} Whether annotation is a plain highlight annotation
+ *
+ * @param {Annotation[]} annotations - Annotations in highlight thread
+ * @return {boolean} Whether annotation is a plain highlight annotation
  */
 export function isPlainHighlight(annotations) {
     return annotations.length === 1 && annotations[0].text === '';
@@ -230,6 +233,8 @@ export function isPlainHighlight(annotations) {
 /**
  * Returns whether or not the annotation type is 'highlight' or
  * 'highlight-comment'
+ *
+ * @param {string} type - Annotatation type
  * @return {boolean} Whether or not annotation is a highlight
  */
 export function isHighlightAnnotation(type) {
@@ -273,6 +278,7 @@ export function getDimensionScale(dimensions, fileDimensions, zoomScale, heightP
 
 /**
  * Escapes HTML.
+ *
  * @param {string} str - Input string
  * @return {string} HTML escaped string
  */
@@ -290,6 +296,7 @@ export function htmlEscape(str) {
  * Repositions caret if annotations dialog will run off the right or left
  * side of the page. Otherwise positions caret at the center of the
  * annotations dialog and the updated left corner x coordinate.
+ *
  * @param  {HTMLElement} dialogEl Annotations dialog element
  * @param  {number} dialogX Left corner x coordinate of the annotations dialog
  * @param  {number} highlightDialogWidth Width of the annotations dialog
@@ -328,6 +335,8 @@ export function repositionCaret(dialogEl, dialogX, highlightDialogWidth, browser
 
 /**
  * Checks thread is in a pending or pending-active state
+ *
+ * @param {string} threadState - State of thread
  * @return {boolean} Whether annotation thread is in a pending state
  */
 export function isPending(threadState) {

@@ -1,7 +1,7 @@
 ![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg?style=flat-square)
 [![Styled With Prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 [![build status](https://img.shields.io/travis/box/box-content-preview/master.svg?style=flat-square)](https://travis-ci.com/box/box-content-preview)
-[![version](https://img.shields.io/badge/version-v0.130.0-blue.svg?style=flat-square)](https://github.com/box/box-content-preview)
+[![version](https://img.shields.io/badge/version-v0.131.1-blue.svg?style=flat-square)](https://github.com/box/box-content-preview)
 [![npm version](https://img.shields.io/npm/v/box-content-ui-kits.svg?style=flat-square)](https://www.npmjs.com/package/box-content-ui-kits)
 
 [Box Content Preview](https://docs.box.com/docs/box-content-preview)
@@ -19,11 +19,11 @@ If you are using Internet Explorer 11, which doesn't natively support promises, 
 
 Current Version
 ---------------
-* Version: v0.130.0
+* Version: v0.131.1
 * Locale: en-US
 
-https://cdn01.boxcdn.net/platform/preview/0.130.0/en-US/preview.js
-https://cdn01.boxcdn.net/platform/preview/0.130.0/en-US/preview.css
+https://cdn01.boxcdn.net/platform/preview/0.131.1/en-US/preview.js
+https://cdn01.boxcdn.net/platform/preview/0.131.1/en-US/preview.css
 
 Supported Locales
 -----------------
@@ -50,8 +50,8 @@ You can self-host the Box Content Preview UI Element or reference the versions a
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise"></script>
 
     <!-- Latest version of Preview SDK for your locale -->
-    <script src="https://cdn01.boxcdn.net/platform/preview/0.130.0/en-US/preview.js"></script>
-    <link rel="stylesheet" href="https://cdn01.boxcdn.net/platform/preview/0.130.0/en-US/preview.css" />
+    <script src="https://cdn01.boxcdn.net/platform/preview/0.131.1/en-US/preview.js"></script>
+    <link rel="stylesheet" href="https://cdn01.boxcdn.net/platform/preview/0.131.1/en-US/preview.css" />
 </head>
 <body>
     <div class="preview-container" style="height:400px;width:575px"></div>
@@ -119,6 +119,34 @@ preview.show(fileId, accessToken, {
 Access Token
 ------------
 Box Content Preview needs an access token to make Box API calls. You can either get an access token from the token endpoint (https://docs.box.com/reference#token) or generate a developer token on your application management page (https://blog.box.com/blog/introducing-developer-tokens/).
+
+If your application requires the end user to only be able to access a subset of the Content Preview functionality, you can use [Token Exchange](https://developer.box.com/reference#token-exchange) to appropriately downscope your App/Managed or Service Account token to a resulting token that has the desired set of permissions, and can thus, be securely passed to the end user client initializing the Content Preview.
+
+Below are a set of new UI Element-specific scopes to go alongside Token Exchange. These allow developers to enable/disable UI controls on the Content Preview by configuring the appropriate scopes on the downscoped token. To learn more, see [Special Scopes for Box UI Elements](https://developer.box.com/v2.0/docs/special-scopes-for-box-ui-elements).
+
+Wish to learn more about when, why and how you can use Token Exchange with the Content Preview? See our [blueprint on Customizing Access for the Box UI Elements](https://developer.box.com/v2.0/docs/customizing-access-for-ui-elements).
+
+### Base Scope
+
+| Scope Name | What permissions does it grant? |
+| --- | --- |
+| base_preview | Allows preview access to a file or files in a folder based on user/file/token permissions |
+
+### Feature Scopes
+| Scope Name | What permissions does it grant? |
+| --- | --- |
+| item_download | Allows files/folders contents to be downloaded |
+| annotation_view_self | Allows user to view their own annotations |
+| annotation_view_all | Allows user to view all annotations on the file |
+| annotation_edit | Allows user to edit their own annotations (includes annotation_view_self) |
+
+### Sample Scenarios
+
+| Scenario| Scope Combinations |
+| --- | --- |
+| User wants basic preview functionality + download | base_preview + item_download |
+| User wants basic preview functionality + ability to edit own annotations| base_preview + annotation_edit |
+| User wants basic preview functionality + ability to view all annotations + ability to edit own annotations| base_preview + annotation_view_all + annotation_edit|
 
 Viewers
 -------

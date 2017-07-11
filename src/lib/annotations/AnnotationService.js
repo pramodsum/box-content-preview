@@ -89,7 +89,6 @@ const ANONYMOUS_USER = {
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.type !== 'error' && data.id) {
-                        // @TODO(tjin): Remove this when response has permissions
                         const tempData = data;
                         tempData.permissions = {
                             can_edit: true,
@@ -244,8 +243,8 @@ const ANONYMOUS_USER = {
      *
      * @private
      * @param {string} fileVersionId - File version ID to fetch annotations for
-     * @param {string} marker - marker to use if there are more than limit annotations
-     *  * @param {int} limit - the amout of annotations the API will return per call
+     * @param {string} marker - Marker to use if there are more than limit annotations
+     * @param {int} limit - The amout of annotations the API will return per call
      * @return {Promise} Promise that resolves with fetched annotations
      */
     getReadUrl(fileVersionId, marker = null, limit = null) {
@@ -266,9 +265,11 @@ const ANONYMOUS_USER = {
      * limit is 100 annotations per API call.
      *
      * @private
+     * @param {Function} resolve - Promise resolution handler
+     * @param {Function} reject - Promise rejection handler
      * @param {string} fileVersionId - File version ID to fetch annotations for
-     * @param {string} marker - marker to use if there are more than limit annotations
-     * @param {int} limit - the amout of annotations the API will return per call
+     * @param {string} marker - Marker to use if there are more than limit annotations
+     * @param {int} limit - The amout of annotations the API will return per call
      * @return {void}
      */
     readFromMarker(resolve, reject, fileVersionId, marker = null, limit = null) {
