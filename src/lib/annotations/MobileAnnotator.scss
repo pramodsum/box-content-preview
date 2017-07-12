@@ -1,17 +1,15 @@
 $tablet: "(min-width: 768px)";
 $three-c: #ccc;
-
 @mixin border-top-bottom {
-    border-color: $three-c;
-    border-style: solid;
-    border-width: 1px 0;
+
 }
 
-.bp-mobile-annotation-dialog {
+.bp-mobile-annotation-dialog{
     background: white;
     border-top: 0;
     height: 100%;
     position: absolute;
+    top: 0;
     width: 100%;
 
     &.bp-animate-show-dialog {
@@ -35,22 +33,14 @@ $three-c: #ccc;
             animation-fill-mode: forwards;
         }
     }
+}
 
-    &.bp-create-annotation-dialog {
+.bp-create-annotation-dialog.bp-mobile-annotation-dialog {
+    height: auto;
+
+    .bp-annotation-highlight-dialog {
+        position: fixed;
         bottom: 0;
-        height: auto;
-
-        &.bp-animate-show-dialog {
-            animation: show-create-dialog-small;
-            animation-duration: .2s;
-            animation-fill-mode: forwards;
-        }
-
-        .bp-annotation-highlight-dialog {
-            position: absolute;
-            bottom: 0;
-            @include border-top-bottom;
-        }
     }
 }
 
@@ -61,16 +51,6 @@ $three-c: #ccc;
 
     100% {
         top: 0%;
-    }
-}
-
-@keyframes show-create-dialog-small {
-    0% {
-        bottom: -56px;
-    }
-
-    100% {
-        bottom: 0px;
     }
 }
 
@@ -94,8 +74,7 @@ $three-c: #ccc;
     }
 }
 
-.bp-mobile-annotation-dialog.bp-annotation-dialog,
-.bp-mobile-annotation-dialog.bp-temp-annotation-dialog {
+.bp-mobile-annotation-dialog.bp-annotation-dialog {
     .annotation-container {
         background-color: $white;
         border: 0;
@@ -103,7 +82,7 @@ $three-c: #ccc;
         height: 100%;
         overflow-x: hidden;
         overflow-y: auto;
-        padding: 15px 15px 60px;
+        padding: 15px;
         position: absolute;
         width: 100%;
     }
@@ -111,11 +90,11 @@ $three-c: #ccc;
     .bp-annotation-mobile-header {
         align-items: center;
         background-color: $white;
+        border-bottom: 1px solid $three-c;
         display: flex;
         height: 48px;
         justify-content: space-between;
         padding: 0;
-        @include border-top-bottom;
     }
 
     .bp-annotation-dialog-close {
@@ -191,6 +170,17 @@ $three-c: #ccc;
     top: auto;
 }
 
+.bp-mobile-annotation-dialog .bp-annotations-highlight-btns,
+.bp-mobile-annotation-dialog .annotation-container section[data-section="create"] {
+    position: fixed;
+    width: 100%;
+    padding: 15px;
+    bottom: 0;
+    left: 0;
+    background: white;
+    @include border-top-bottom;
+}
+
 .bp-mobile-annotation-dialog .bp-annotation-highlight-dialog {
     border: none;
     color: $fours;
@@ -202,13 +192,11 @@ $three-c: #ccc;
     text-align: center;
     z-index: 9999;
 
-    .bp-annotations-highlight-btns {
-        button {
-            width: 50%;
-            float: left;
-        }
+    .bp-annotations-highlight-btns button {
+        width: 50%;
+        float: left;
 
-        button:first-child {
+        &:first-child {
              border-right: 1px solid $three-c;
         }
     }

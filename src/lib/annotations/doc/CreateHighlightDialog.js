@@ -350,6 +350,7 @@ class CreateHighlightDialog extends EventEmitter {
         highlightDialogEl.addEventListener('click', this.stopPropagation);
         highlightDialogEl.addEventListener('mouseup', this.stopPropagation);
         highlightDialogEl.addEventListener('touchend', this.stopPropagation);
+        highlightDialogEl.addEventListener('touchstart', this.stopPropagation);
         highlightDialogEl.addEventListener('dblclick', this.stopPropagation);
 
         // Event listeners

@@ -112,6 +112,7 @@ function isThreadInHoverState(thread) {
         this.createHighlightThread = this.createHighlightThread.bind(this);
         this.createPlainHighlight = this.createPlainHighlight.bind(this);
         this.highlightCreateHandler = this.highlightCreateHandler.bind(this);
+        this.onTouchStart = this.onTouchStart.bind(this);
 
         this.createHighlightDialog = new CreateHighlightDialog(undefined, this.isMobile);
         this.createHighlightDialog.addListener(CreateEvents.plain, this.createPlainHighlight);
@@ -412,6 +413,7 @@ function isThreadInHoverState(thread) {
             this.annotatedElement.addEventListener('mousemove', this.getHighlightMouseMoveHandler());
             if (this.isMobile) {
                 document.addEventListener('selectionchange', this.highlightCreateHandler);
+                document.addEventListener('touchstart', this.onTouchStart);
             }
         }
     }
@@ -433,6 +435,7 @@ function isThreadInHoverState(thread) {
             this.annotatedElement.removeEventListener('mousemove', this.getHighlightMouseMoveHandler());
             if (this.isMobile) {
                 document.removeEventListener('selectionchange', this.highlightCreateHandler);
+                document.removeEventListener('touchstart', this.onTouchStart);
             }
         }
 
@@ -675,6 +678,13 @@ function isThreadInHoverState(thread) {
             this.highlightClickHandler(event);
         }
         this.isCreatingHighlight = false;
+    }
+
+    onTouchStart(event) {
+        if (this.highlighter) {
+            this.highlighter.removeAllHighlights();
+        }
+        this.createHighlightDialog.hide();
     }
 
     /**
