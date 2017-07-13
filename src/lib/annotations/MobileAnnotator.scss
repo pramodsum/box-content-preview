@@ -1,7 +1,9 @@
 $tablet: "(min-width: 768px)";
 $three-c: #ccc;
 @mixin border-top-bottom {
-
+    border-color: $three-c;
+    border-style: solid;
+    border-width: 1px 0;
 }
 
 .bp-mobile-annotation-dialog{
@@ -37,6 +39,11 @@ $three-c: #ccc;
 
 .bp-create-annotation-dialog.bp-mobile-annotation-dialog {
     height: auto;
+
+    .bp-annotation-highlight-dialog {
+        position: fixed;
+        bottom: 0;
+    }
 }
 
 @keyframes show-dialog-small {
@@ -65,7 +72,7 @@ $three-c: #ccc;
     }
 
     100% {
-        top: 1px;
+        top: 0;
     }
 }
 
@@ -160,9 +167,9 @@ $three-c: #ccc;
 
 /* Highlight dialog */
 .bp-mobile-annotation-dialog.bp-plain-highlight {
-    border-bottom: 1px solid $three-c;
     height: 47px; // includes mobile header & highlight dialog
     top: auto;
+    @include border-top-bottom;
 }
 
 .bp-mobile-annotation-dialog .bp-annotations-highlight-btns,
