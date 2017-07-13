@@ -35,6 +35,7 @@ import { ICON_CLOSE, ICON_DELETE } from '../icons/icons';
         super();
 
         this.annotatedElement = data.annotatedElement;
+        this.container = data.container;
         this.location = data.location;
         this.hasAnnotations = data.annotations.length > 0;
         this.canAnnotate = data.canAnnotate;
@@ -66,7 +67,7 @@ import { ICON_CLOSE, ICON_DELETE } from '../icons/icons';
     show() {
         // Populate mobile annotations dialog with annotations information
         if (this.isMobile) {
-            this.element = document.body.querySelector(`#${constants.ID_MOBILE_ANNOTATION_DIALOG}`);
+            this.element = this.container.querySelector(`.${constants.CLASS_MOBILE_ANNOTATION_DIALOG}`);
             annotatorUtil.showElement(this.element);
             this.element.appendChild(this.dialogEl);
 
