@@ -41,9 +41,11 @@ const PAGE_PADDING_TOP = 15;
             }
         } else {
             // Convert from plain highlight to comment
-            const headerEl = this.element.querySelector('.bp-annotation-mobile-header');
-            headerEl.classList.remove(CLASS_HIDDEN);
-            this.element.classList.remove('bp-plain-highlight');
+            const headerEl = this.isMobile ? this.element.querySelector('.bp-annotation-mobile-header') : null;
+            if (headerEl) {
+                headerEl.classList.remove(CLASS_HIDDEN);
+                this.element.classList.remove('bp-plain-highlight');
+            }
         }
 
         super.addAnnotation(annotation);

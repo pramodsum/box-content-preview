@@ -37,11 +37,6 @@ $three-c: #ccc;
 
 .bp-create-annotation-dialog.bp-mobile-annotation-dialog {
     height: auto;
-
-    .bp-annotation-highlight-dialog {
-        position: fixed;
-        bottom: 0;
-    }
 }
 
 @keyframes show-dialog-small {
