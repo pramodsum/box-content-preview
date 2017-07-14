@@ -392,7 +392,7 @@ import { ICON_CLOSE, ICON_DELETE } from '../icons/icons';
             // Clicking 'Cancel' button to cancel the annotation
             case 'cancel-annotation-btn':
                 if (this.isMobile) {
-                    this.hideMobileDialog();
+                    this.hide();
                 } else {
                     this.cancelAnnotation();
                 }

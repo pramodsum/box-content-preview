@@ -52,6 +52,20 @@ const PAGE_PADDING_TOP = 15;
     }
 
     /**
+     * 
+     */
+    hide() {
+        if (this.isMobile && this.hasComments && this.element && this.highlightDialogEl) {
+            annotatorUtil.hideElement(this.commentsDialogEl);
+
+            this.element.classList.add(constants.CLASS_ANNOTATION_DIALOG_HIGHLIGHT);
+            annotatorUtil.showElement(this.highlightDialogEl);
+            this.hasComments = false;
+        }
+        super.hide();
+    }
+
+    /**
      * Emit the message to create a highlight and render it.
      *
      * @public
@@ -124,6 +138,10 @@ const PAGE_PADDING_TOP = 15;
      * @return {void}
      */
     toggleHighlightDialogs() {
+        if (!this.commentsDialogEl || !this.highlightDialogEl) {
+            return;
+        }
+
         const commentsDialogIsHidden = this.commentsDialogEl.classList.contains(CLASS_HIDDEN);
 
         // Displays comments dialog and hides highlight annotations button
