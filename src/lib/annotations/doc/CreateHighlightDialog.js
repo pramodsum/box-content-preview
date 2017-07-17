@@ -2,7 +2,6 @@ import EventEmitter from 'events';
 import { ICON_HIGHLIGHT, ICON_HIGHLIGHT_COMMENT } from '../../icons/icons';
 import CommentBox from '../CommentBox';
 import { hideElement, showElement } from '../annotatorUtil';
-import { CLASS_ANIMATE_DIALOG } from '../annotationConstants';
 
 const CLASS_CREATE_DIALOG = 'bp-create-annotation-dialog';
 const TITLE_HIGHLIGHT_TOGGLE = __('annotation_highlight_toggle');
@@ -165,11 +164,6 @@ class CreateHighlightDialog extends EventEmitter {
 
         this.setButtonVisibility(true);
 
-        // Because annotation dialog parent will not be visible.
-        if (this.isMobile) {
-            this.containerEl.classList.add(CLASS_ANIMATE_DIALOG);
-        }
-
         showElement(this.containerEl);
     }
 
@@ -181,10 +175,6 @@ class CreateHighlightDialog extends EventEmitter {
     hide() {
         if (!this.containerEl) {
             return;
-        }
-
-        if (this.isMobile) {
-            this.containerEl.classList.remove(CLASS_ANIMATE_DIALOG);
         }
 
         hideElement(this.containerEl);

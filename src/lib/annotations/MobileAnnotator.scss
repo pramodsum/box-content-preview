@@ -41,7 +41,6 @@ $three-c: #ccc;
     height: auto;
 
     .bp-annotation-highlight-dialog {
-        position: fixed;
         bottom: 0;
     }
 }
@@ -173,6 +172,7 @@ $three-c: #ccc;
 }
 
 .bp-mobile-annotation-dialog .bp-annotations-highlight-btns,
+.bp-mobile-annotation-dialog .bp-create-highlight-comment,
 .bp-mobile-annotation-dialog .annotation-container section[data-section="create"] {
     position: fixed;
     width: 100%;
