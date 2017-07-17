@@ -100,6 +100,7 @@ class CreateHighlightDialog extends EventEmitter {
      * [constructor]
      *
      * @param {HTMLElement} parentEl - Parent element
+     * @param {boolean} isMobile - Whether or not this is running on a mobile device
      * @return {CreateHighlightDialog} CreateHighlightDialog instance
      */
     constructor(parentEl, isMobile = false) {

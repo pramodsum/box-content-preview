@@ -681,7 +681,12 @@ function isThreadInHoverState(thread) {
         this.isCreatingHighlight = false;
     }
 
-    onTouchStart(event) {
+    /**
+     * Handle touch start event.
+     * 
+     * @return {void}
+     */
+    onTouchStart() {
         if (this.highlighter) {
             this.highlighter.removeAllHighlights();
         }

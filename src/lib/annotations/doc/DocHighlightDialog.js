@@ -51,9 +51,7 @@ const PAGE_PADDING_TOP = 15;
         super.addAnnotation(annotation);
     }
 
-    /**
-     * 
-     */
+    /** @inheritdoc */
     hide() {
         if (this.isMobile && this.hasComments && this.element && this.highlightDialogEl) {
             annotatorUtil.hideElement(this.commentsDialogEl);
