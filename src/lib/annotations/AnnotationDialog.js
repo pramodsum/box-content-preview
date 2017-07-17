@@ -13,7 +13,6 @@ const CLASS_CANNOT_ANNOTATE = 'cannot-annotate';
 const CLASS_COMMENTS_CONTAINER = 'annotation-comments';
 const CLASS_REPLY_CONTAINER = 'reply-container';
 const CLASS_REPLY_TEXTAREA = 'reply-textarea';
-const CLASS_ANIMATE_DIALOG = 'bp-animate-show-dialog';
 const CLASS_DELETE_CONFIRMATION = 'delete-confirmation';
 const CLASS_BUTTON_DELETE_CONFIRM = 'confirm-delete-btn';
 
@@ -33,6 +32,7 @@ const DATA_TYPE_CONFIRM_DELETE = 'confirm-delete-btn';
 
     /**
      * The data object for constructing a dialog.
+     *
      * @typedef {Object} AnnotationDialogData
      * @property {HTMLElement} annotatedElement HTML element being annotated on
      * @property {Annotation[]} annotations Annotations in dialog, can be an

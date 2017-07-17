@@ -59,16 +59,13 @@ const PAGE_PADDING_TOP = 15;
     }
 
     /** @inheritdoc */
-    hide() {
-        if (this.isMobile && this.hasComments && this.element && this.highlightDialogEl) {
-            annotatorUtil.hideElement(this.commentsDialogEl);
+    // hideMobileDialog() {
+    //     super.hideMobileDialog();
 
-            this.element.classList.add(CLASS_ANNOTATION_HIGHLIGHT_DIALOG);
-            annotatorUtil.showElement(this.highlightDialogEl);
-            this.hasComments = false;
-        }
-        super.hide();
-    }
+    //     if (this.hasComments && this.element && this.highlightDialogEl) {
+    //         // this.hasComments = false;
+    //     }
+    // }
 
     /**
      * Emit the message to create a highlight and render it.

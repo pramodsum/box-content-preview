@@ -354,6 +354,18 @@ const HOVER_TIMEOUT_MS = 75;
         this.dialog.removeAllListeners('annotationcancel');
         this.dialog.removeAllListeners('annotationdelete');
     }
+    /** @inheritdoc */
+    cancelUnsavedAnnotation() {
+        if (!this.isMobile && !annotatorUtil.isPending(this.state)) {
+            return;
+        }
+
+        if (annotatorUtil.isPlainHighlight(this.annotations)) {
+            this.toggleHighlightDialogs();
+        } else {
+            super.cancelUnsavedAnnotation();
+        }
+    }
 
     //--------------------------------------------------------------------------
     // Private
