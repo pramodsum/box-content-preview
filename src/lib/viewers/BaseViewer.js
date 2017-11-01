@@ -366,7 +366,7 @@ class BaseViewer extends EventEmitter {
             }
 
             if (this.annotatorConf) {
-                this.initAnnotations();
+                this.annotator.init(this.scale);
             }
         });
     }
@@ -660,6 +660,7 @@ class BaseViewer extends EventEmitter {
         try {
             const boxAnnotations = new BoxAnnotations();
             this.annotatorConf = boxAnnotations.determineAnnotator(this.options, this.viewerConfig);
+            this.initAnnotations();
         } catch (err) {
             /* eslint-disable no-console */
             console.error('Annotation assets failed to load');
@@ -680,7 +681,6 @@ class BaseViewer extends EventEmitter {
             modeButtons: ANNOTATION_BUTTONS
         });
         this.annotator = new this.annotatorConf.CONSTRUCTOR(annotatorOptions);
-        this.annotator.init(this.scale);
 
         // Once the annotator instance has been created, emit it so that clients can attach their events.
         // Annotator object will still be sent along with the viewer in the load event also.
