@@ -706,7 +706,9 @@ class BaseViewer extends EventEmitter {
     annotationsLoadHandler() {
         // Set viewer-specific annotation options
         const viewerOptions = {};
-        viewerOptions[this.options.viewer.NAME] = this.viewerConfig;
+        viewerOptions[this.options.viewer.NAME] = {
+            enabledTypes: ['highlight', 'draw']
+        };
 
         /* global BoxAnnotations */
         const boxAnnotations = this.options.boxAnnotations || new BoxAnnotations(viewerOptions);
