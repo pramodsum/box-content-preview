@@ -8,6 +8,7 @@ import DocLoader from './viewers/doc/DocLoader';
 import Model3DLoader from './viewers/box3d/model3d/Model3DLoader';
 import IFrameLoader from './viewers/iframe/IFrameLoader';
 import OfficeLoader from './viewers/office/OfficeLoader';
+import ScratchLoader from './viewers/scratch/ScratchLoader';
 
 // Order in this list matters
 export default [
@@ -20,5 +21,6 @@ export default [
     Image360Loader,
     ImageLoader,
     Model3DLoader,
+    ScratchLoader,
     IFrameLoader
 ];
