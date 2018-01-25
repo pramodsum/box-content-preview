@@ -12,6 +12,7 @@ const CSS_CLASS_PANNING = 'panning';
 const CSS_CLASS_ZOOMABLE = 'zoomable';
 const CSS_CLASS_PANNABLE = 'pannable';
 const CSS_CLASS_SCRATCH_VIEWER = 'bp-scratch-viewer';
+const PADDING_TOP = 34;
 
 const MODES = {
     none: 0,
@@ -36,6 +37,9 @@ class ScratchViewer extends BaseViewer {
         this.stopPanning = this.stopPanning.bind(this);
         this.zoomIn = this.zoomIn.bind(this);
         this.zoomOut = this.zoomOut.bind(this);
+
+        this.handleTouchStart = this.handleTouchStart.bind(this);
+        this.handleTouchMove = this.handleTouchMove.bind(this);
 
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.handleMouseUp = this.handleMouseUp.bind(this);
@@ -138,8 +142,12 @@ class ScratchViewer extends BaseViewer {
         this.canvas.setLineWidth(LINE_WIDTH.medium);
 
         this.scratchControls.on(CONTROL_EVENT.line.tiny, () => {
-            this.canvas.setLineWidth(LINE_WIDTH.tiny);
-            this.mode = MODES.line;
+            if (this.mode !== MODES.line) {
+                this.canvas.setLineWidth(LINE_WIDTH.tiny);
+                this.mode = MODES.line;
+            } else {
+                this.canvas.setLineWidth(LINE_WIDTH.tiny);
+            }
         });
 
         this.scratchControls.on(CONTROL_EVENT.line.medium, () => {
@@ -158,7 +166,11 @@ class ScratchViewer extends BaseViewer {
         });
 
         this.scratchControls.on(CONTROL_EVENT.erase.enable, () => {
-            this.mode = MODES.erase;
+            if (this.mode !== MODES.erase) {
+                this.mode = MODES.erase;
+            } else {
+                this.mode = MODES.line;
+            }
         });
     }
 
@@ -198,7 +210,7 @@ class ScratchViewer extends BaseViewer {
      * @return {void}
      */
     startPanning(x, y) {
-        if (!this.isPannable) {
+        if (!this.isPannable || this.isMobile) {
             return;
         }
 
@@ -223,7 +235,7 @@ class ScratchViewer extends BaseViewer {
      * @return {void}
      */
     pan(event) {
-        if (!this.isPanning) {
+        if (!this.isPanning || this.isMobile) {
             return;
         }
         const offsetX = event.clientX - this.panStartX;
@@ -303,9 +315,14 @@ class ScratchViewer extends BaseViewer {
         this.imageEl.addEventListener('load', this.finishLoading);
         this.imageEl.addEventListener('error', this.errorHandler);
 
-        this.canvas.canvas.addEventListener('mousedown', this.handleMouseDown);
-        this.canvas.canvas.addEventListener('mouseup', this.handleMouseUp);
-        this.canvas.canvas.addEventListener('mousemove', this.handleMouseMove);
+        if (this.isMobile) {
+            this.canvas.canvas.addEventListener('touchstart', this.handleTouchStart);
+            this.canvas.canvas.addEventListener('touchmove', this.handleTouchMove);
+        } else {
+            this.canvas.canvas.addEventListener('mousedown', this.handleMouseDown);
+            this.canvas.canvas.addEventListener('mouseup', this.handleMouseUp);
+            this.canvas.canvas.addEventListener('mousemove', this.handleMouseMove);
+        }
 
         // this.imageEl.addEventListener('mousedown', this.handleMouseDown);
         // this.imageEl.addEventListener('mouseup', this.handleMouseUp);
@@ -339,6 +356,8 @@ class ScratchViewer extends BaseViewer {
             return;
         }
 
+        this.imageEl.canvas.removeEventListener('touchstart', this.handleTouchStart);
+        this.imageEl.canvas.removeEventListener('touchmove', this.handleTouchMove);
         this.imageEl.removeEventListener('mousedown', this.handleMouseDown);
         this.imageEl.removeEventListener('mouseup', this.handleMouseUp);
         this.imageEl.removeEventListener('dragstart', this.cancelDragEvent);
@@ -401,7 +420,7 @@ class ScratchViewer extends BaseViewer {
      * @return {void}
      */
     handleMouseDown(event) {
-        const { button, ctrlKey, metaKey, offsetX, offsetY } = event;
+        const { offsetX, offsetY } = event;
 
         lastX = offsetX;
         lastY = offsetY;
@@ -412,7 +431,32 @@ class ScratchViewer extends BaseViewer {
                 break;
             case MODES.none:
             default:
-                console.log('yay, nothing');
+        }
+    }
+
+    /**
+     * Handles mouse down event.
+     *
+     * @param {Event} event - The mousemove event
+     * @return {void}
+     */
+    handleTouchStart(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        let { pageX, pageY } = event.targetTouches[0];
+        pageX -= PADDING_TOP;
+        pageY -= PADDING_TOP;
+
+        lastX = pageX;
+        lastY = pageY;
+        isDrawing = true;
+
+        switch (this.mode) {
+            case MODES.line:
+                break;
+            case MODES.none:
+            default:
         }
     }
 
@@ -447,7 +491,7 @@ class ScratchViewer extends BaseViewer {
             return;
         }
 
-        const { button, ctrlKey, metaKey, offsetX, offsetY } = event;
+        const { offsetX, offsetY } = event;
 
         switch (this.mode) {
             case MODES.line:
@@ -463,6 +507,34 @@ class ScratchViewer extends BaseViewer {
 
         lastX = offsetX;
         lastY = offsetY;
+    }
+
+    handleTouchMove(event) {
+        if (!isDrawing) {
+            return;
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
+
+        let { pageX, pageY } = event.targetTouches[0];
+        pageX -= PADDING_TOP;
+        pageY -= PADDING_TOP;
+
+        switch (this.mode) {
+            case MODES.line:
+                this.canvas.bezierTo(lastX, lastY, pageX, pageY);
+                break;
+            case MODES.erase:
+                this.canvas.erase(pageX, pageY);
+                break;
+            case MODES.none:
+            default:
+            //
+        }
+
+        lastX = pageX;
+        lastY = pageY;
     }
 
     /**

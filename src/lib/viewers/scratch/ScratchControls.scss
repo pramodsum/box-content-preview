@@ -4,6 +4,10 @@ $not-black: rgb(45, 45, 45);
 $not-white: rgb(240, 240, 240);
 $open-white: rgb(200, 200, 200);
 
+document {
+    top: 0;
+}
+
 .bp-scratch-viewer {
     .bp-scratch-controls {
         background: $white;

@@ -88,19 +88,21 @@ class ScratchControls extends EventEmitter {
                 this.emit(eventName);
             }
 
-            if (!el.classList.contains('erase-item')) {
-                this.controlsEl.childNodes.forEach((btn) => {
-                    btn.classList.remove('selected');
-
-                });
-            }
-            el.classList.add('selected');
-
-            if (el.classList.contains('open')) {
-                el.classList.remove('open');
+            if (!el.classList.contains('selected')) {
+                el.classList.add('selected');
             } else {
-                el.classList.remove('open');
+                el.classList.remove('selected');
             }
+
+            if (el.classList.contains('erase-item')) {
+                return;
+            }
+
+            this.controlsEl.childNodes.forEach((btn) => {
+                btn.classList.remove('selected');
+            });
+
+            el.classList.add('selected');
         });
     }
 
