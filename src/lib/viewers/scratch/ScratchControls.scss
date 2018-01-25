@@ -86,7 +86,8 @@ document {
                 background: fade-out($box-blue, .1);
             }
 
-            &:hover > svg {
+            &:focus > svg,
+            &:active > svg {
                 fill: fade-out($box-blue, .1);
             }
         }

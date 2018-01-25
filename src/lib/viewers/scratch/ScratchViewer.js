@@ -67,14 +67,20 @@ class ScratchViewer extends BaseViewer {
      * @return {void}
      */
     destroy() {
-        this.unbindDOMListeners();
+        if (this.canvas) {
+            this.canvas.canvas.toBlob((blobbyFlay) => {
+                this.emit('save_scratch', blobbyFlay);
 
-        // Destroy the controls
-        if (this.controls && typeof this.controls.destroy === 'function') {
-            this.controls.destroy();
+                this.unbindDOMListeners();
+
+                // Destroy the controls
+                if (this.controls && typeof this.controls.destroy === 'function') {
+                    this.controls.destroy();
+                }
+
+                super.destroy();
+            });
         }
-
-        super.destroy();
     }
 
     /**
@@ -166,10 +172,10 @@ class ScratchViewer extends BaseViewer {
         });
 
         this.scratchControls.on(CONTROL_EVENT.erase.enable, () => {
-            if (this.mode !== MODES.erase) {
-                this.mode = MODES.erase;
-            } else {
+            if (this.mode === MODES.erase) {
                 this.mode = MODES.line;
+            } else {
+                this.mode = MODES.erase;
             }
         });
     }
@@ -356,8 +362,8 @@ class ScratchViewer extends BaseViewer {
             return;
         }
 
-        this.imageEl.canvas.removeEventListener('touchstart', this.handleTouchStart);
-        this.imageEl.canvas.removeEventListener('touchmove', this.handleTouchMove);
+        this.imageEl.removeEventListener('touchstart', this.handleTouchStart);
+        this.imageEl.removeEventListener('touchmove', this.handleTouchMove);
         this.imageEl.removeEventListener('mousedown', this.handleMouseDown);
         this.imageEl.removeEventListener('mouseup', this.handleMouseUp);
         this.imageEl.removeEventListener('dragstart', this.cancelDragEvent);
@@ -445,7 +451,6 @@ class ScratchViewer extends BaseViewer {
         event.preventDefault();
 
         let { pageX, pageY } = event.targetTouches[0];
-        pageX -= PADDING_TOP;
         pageY -= PADDING_TOP;
 
         lastX = pageX;
@@ -518,7 +523,6 @@ class ScratchViewer extends BaseViewer {
         event.preventDefault();
 
         let { pageX, pageY } = event.targetTouches[0];
-        pageX -= PADDING_TOP;
         pageY -= PADDING_TOP;
 
         switch (this.mode) {

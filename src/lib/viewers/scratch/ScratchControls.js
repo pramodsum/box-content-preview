@@ -84,10 +84,6 @@ class ScratchControls extends EventEmitter {
 
     addSubMenuEvent(el, eventName) {
         el.addEventListener('click', () => {
-            if (eventName) {
-                this.emit(eventName);
-            }
-
             if (!el.classList.contains('selected')) {
                 el.classList.add('selected');
             } else {
@@ -95,6 +91,9 @@ class ScratchControls extends EventEmitter {
             }
 
             if (el.classList.contains('erase-item')) {
+                if (eventName) {
+                    this.emit(eventName);
+                }
                 return;
             }
 
@@ -103,6 +102,10 @@ class ScratchControls extends EventEmitter {
             });
 
             el.classList.add('selected');
+
+            if (eventName) {
+                this.emit(eventName);
+            }
         });
     }
 
