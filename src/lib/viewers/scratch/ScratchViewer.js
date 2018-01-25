@@ -12,7 +12,19 @@ const CSS_CLASS_ZOOMABLE = 'zoomable';
 const CSS_CLASS_PANNABLE = 'pannable';
 const CSS_CLASS_SCRATCH_VIEWER = 'bp-scratch-viewer';
 
+const MODES = {
+    none: 0,
+    line: 1
+};
+
+let lastX = 0;
+let lastY = 0;
+// used to determine if we are allowed to draw
+let isDrawing = false;
+
 class ScratchViewer extends BaseViewer {
+    mode = MODES.line;
+
     /** @inheritdoc */
     constructor(options) {
         super(options);
@@ -25,6 +37,8 @@ class ScratchViewer extends BaseViewer {
 
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.handleMouseUp = this.handleMouseUp.bind(this);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+
         this.cancelDragEvent = this.cancelDragEvent.bind(this);
         this.finishLoading = this.finishLoading.bind(this);
         this.errorHandler = this.errorHandler.bind(this);
@@ -76,6 +90,7 @@ class ScratchViewer extends BaseViewer {
         this.wrapperEl.classList.add(CSS_CLASS_SCRATCH_VIEWER);
 
         this.imageEl = document.createElement('img');
+        this.imageEl.crossOrigin = 'Anonymous';
         this.canvas = new ScratchCanvas(this.wrapperEl);
         this.canvas.hide();
     }
@@ -113,8 +128,8 @@ class ScratchViewer extends BaseViewer {
 
         this.loaded = true;
         this.emit(VIEWER_EVENT.load);
-        this.canvas.resize();
-        this.canvas.renderImage(0, 0, this.imageEl);
+        this.canvas.resize(this.imageEl.width, this.imageEl.height);
+        this.canvas.renderImage(this.imageEl);
         this.canvas.show();
     }
 
@@ -142,7 +157,7 @@ class ScratchViewer extends BaseViewer {
      * @return {void}
      */
     resize() {
-        this.zoom();
+        this.canvas.resize();
         super.resize();
     }
 
@@ -258,22 +273,27 @@ class ScratchViewer extends BaseViewer {
     bindDOMListeners() {
         this.imageEl.addEventListener('load', this.finishLoading);
         this.imageEl.addEventListener('error', this.errorHandler);
-        this.imageEl.addEventListener('mousedown', this.handleMouseDown);
-        this.imageEl.addEventListener('mouseup', this.handleMouseUp);
-        this.imageEl.addEventListener('dragstart', this.cancelDragEvent);
 
-        if (this.isMobile) {
-            this.imageEl.addEventListener('orientationchange', this.handleOrientationChange);
+        this.wrapperEl.addEventListener('mousedown', this.handleMouseDown);
+        this.wrapperEl.addEventListener('mouseup', this.handleMouseUp);
+        this.wrapperEl.addEventListener('mousemove', this.handleMouseMove);
 
-            if (Browser.isIOS()) {
-                this.imageEl.addEventListener('gesturestart', this.mobileZoomStartHandler);
-                this.imageEl.addEventListener('gestureend', this.mobileZoomEndHandler);
-            } else {
-                this.imageEl.addEventListener('touchstart', this.mobileZoomStartHandler);
-                this.imageEl.addEventListener('touchmove', this.mobileZoomChangeHandler);
-                this.imageEl.addEventListener('touchend', this.mobileZoomEndHandler);
-            }
-        }
+        // this.imageEl.addEventListener('mousedown', this.handleMouseDown);
+        // this.imageEl.addEventListener('mouseup', this.handleMouseUp);
+        // this.imageEl.addEventListener('dragstart', this.cancelDragEvent);
+
+        // if (this.isMobile) {
+        //     this.imageEl.addEventListener('orientationchange', this.handleOrientationChange);
+
+        //     if (Browser.isIOS()) {
+        //         this.imageEl.addEventListener('gesturestart', this.mobileZoomStartHandler);
+        //         this.imageEl.addEventListener('gestureend', this.mobileZoomEndHandler);
+        //     } else {
+        //         this.imageEl.addEventListener('touchstart', this.mobileZoomStartHandler);
+        //         this.imageEl.addEventListener('touchmove', this.mobileZoomChangeHandler);
+        //         this.imageEl.addEventListener('touchend', this.mobileZoomEndHandler);
+        //     }
+        // }
     }
 
     /**
@@ -352,14 +372,18 @@ class ScratchViewer extends BaseViewer {
      * @return {void}
      */
     handleMouseDown(event) {
-        const { button, ctrlKey, metaKey, clientX, clientY } = event;
-        this.didPan = false;
+        const { button, ctrlKey, metaKey, offsetX, offsetY } = event;
 
-        // If this is not a left click, then ignore
-        // If this is a CTRL or CMD click, then ignore
-        if ((typeof button !== 'number' || button < 2) && !ctrlKey && !metaKey) {
-            this.startPanning(clientX, clientY);
-            event.preventDefault();
+        lastX = offsetX;
+        lastY = offsetY;
+        isDrawing = true;
+
+        switch (this.mode) {
+            case MODES.line:
+                break;
+            case MODES.none:
+            default:
+                console.log('yay, nothing');
         }
     }
 
@@ -370,6 +394,8 @@ class ScratchViewer extends BaseViewer {
      * @return {void}
      */
     handleMouseUp(event) {
+        isDrawing = false;
+
         const { button, ctrlKey, metaKey } = event;
 
         // If this is not a left click, then ignore
@@ -385,6 +411,26 @@ class ScratchViewer extends BaseViewer {
             }
             event.preventDefault();
         }
+    }
+
+    handleMouseMove(event) {
+        if (!isDrawing) {
+            return;
+        }
+
+        const { button, ctrlKey, metaKey, offsetX, offsetY } = event;
+
+        switch (this.mode) {
+            case MODES.line:
+                this.canvas.bezierTo(lastX, lastY, offsetX, offsetY);
+                break;
+            case MODES.none:
+            default:
+                console.log('yay, nothing');
+        }
+
+        lastX = offsetX;
+        lastY = offsetY;
     }
 
     /**
