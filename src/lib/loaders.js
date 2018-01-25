@@ -18,9 +18,9 @@ export default [
     SWFLoader,
     Video360Loader,
     MediaLoader,
+    ScratchLoader,
     Image360Loader,
     ImageLoader,
     Model3DLoader,
-    ScratchLoader,
     IFrameLoader
 ];

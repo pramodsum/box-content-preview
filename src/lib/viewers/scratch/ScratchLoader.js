@@ -10,8 +10,7 @@ const VIEWERS = [
         NAME: 'Scratch',
         CONSTRUCTOR: ScratchViewer,
         REP: ORIGINAL_REP_NAME,
-        EXT: ['scratch'],
-        ASSET: '.jpg'
+        EXT: ['scratch', 'ai', 'bmp', 'dcm', 'eps', 'gif', 'png', 'ps', 'psd', 'svs', 'tga', 'tif', 'tiff', 'jpg', 'jpeg']
     }
 ];
 

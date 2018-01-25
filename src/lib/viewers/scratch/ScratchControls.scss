@@ -1,0 +1,61 @@
+$not-black: rgb(45, 45, 45);
+$not-white: rgb(240, 240, 240);
+$open-white: rgb(200, 200, 200);
+
+.bp-scratch-viewer {
+    .bp-scratch-controls {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        bottom: 95%;
+        overflow-y: hidden;
+
+        .menu-item {
+            width: 40px;
+            height: 40px;
+            background-color: $not-white;
+            border-top: 1px solid $not-black;
+            cursor: pointer;
+
+            &:hover {
+                background-color: $open-white;
+            }
+
+            &.open {
+                background-color: $open-white;
+            }
+
+            &.open-item::after {
+                content: "Open";
+            }
+
+            &.open-item::after.open {
+                content: "Close";
+            }
+
+            &.color-item::after {
+                content: "Color";
+            }
+
+            &.line-item::after {
+                content: "Line";
+            }
+
+            &.shape-item::after {
+                content: "Shape";
+            }
+
+            &.pan-item::after {
+                content: "Pan";
+            }
+
+            &.erase-item::after {
+                content: "Erase";
+            }
+        }
+
+        &.open {
+            bottom: 5px;
+        }
+    }
+}

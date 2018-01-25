@@ -4,8 +4,9 @@ import { VIEWER_EVENT } from '../../events';
 import { PERMISSION_DOWNLOAD } from '../../constants';
 import { get, appendQueryParams, getHeaders } from '../../util';
 import { checkPermission, getDownloadURL } from '../../file';
-import ScratchCanvas from './ScratchCanvas';
+import ScratchCanvas, { LINE_WIDTH } from './ScratchCanvas';
 import './ScratchViewer.scss';
+import ScratchControls, { CONTROL_EVENT } from './ScratchControls';
 
 const CSS_CLASS_PANNING = 'panning';
 const CSS_CLASS_ZOOMABLE = 'zoomable';
@@ -23,7 +24,7 @@ let lastY = 0;
 let isDrawing = false;
 
 class ScratchViewer extends BaseViewer {
-    mode = MODES.line;
+    mode = MODES.none;
 
     /** @inheritdoc */
     constructor(options) {
@@ -93,6 +94,8 @@ class ScratchViewer extends BaseViewer {
         this.imageEl.crossOrigin = 'Anonymous';
         this.canvas = new ScratchCanvas(this.wrapperEl);
         this.canvas.hide();
+
+        this.scratchControls = new ScratchControls(this.wrapperEl);
     }
 
     /**
@@ -131,6 +134,15 @@ class ScratchViewer extends BaseViewer {
         this.canvas.resize(this.imageEl.width, this.imageEl.height);
         this.canvas.renderImage(this.imageEl);
         this.canvas.show();
+
+        this.scratchControls.on(CONTROL_EVENT.line.tiny, () => {
+            this.canvas.setLineWidth(LINE_WIDTH.tiny)
+            this.mode = MODES.line;
+        });
+
+        this.scratchControls.on(CONTROL_EVENT.pan.toggle, () => {
+            this.mode = MODES.none;
+        });
     }
 
     /**
@@ -274,9 +286,9 @@ class ScratchViewer extends BaseViewer {
         this.imageEl.addEventListener('load', this.finishLoading);
         this.imageEl.addEventListener('error', this.errorHandler);
 
-        this.wrapperEl.addEventListener('mousedown', this.handleMouseDown);
-        this.wrapperEl.addEventListener('mouseup', this.handleMouseUp);
-        this.wrapperEl.addEventListener('mousemove', this.handleMouseMove);
+        this.canvas.canvas.addEventListener('mousedown', this.handleMouseDown);
+        this.canvas.canvas.addEventListener('mouseup', this.handleMouseUp);
+        this.canvas.canvas.addEventListener('mousemove', this.handleMouseMove);
 
         // this.imageEl.addEventListener('mousedown', this.handleMouseDown);
         // this.imageEl.addEventListener('mouseup', this.handleMouseUp);
@@ -426,7 +438,7 @@ class ScratchViewer extends BaseViewer {
                 break;
             case MODES.none:
             default:
-                console.log('yay, nothing');
+                //
         }
 
         lastX = offsetX;
