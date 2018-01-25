@@ -1,0 +1,52 @@
+$not-black: rgb(45, 45, 45);
+$not-white: rgb(240, 240, 240);
+$open-white: rgb(200, 200, 200);
+
+.bp-scratch-viewer {
+    .bp-scratch-controls {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        bottom: 5px;
+
+        .menu-item {
+            width: 40px;
+            height: 40px;
+            background-color: $not-white;
+            border-top: 1px solid $not-black;
+            cursor: pointer;
+
+            &:hover {
+                background-color: $open-white;
+            }
+
+            &.open {
+                background-color: $open-white;
+            }
+
+            &.open-item::after.open {
+                content: "Close";
+            }
+
+            &.line-item-sm::after {
+                content: "Small";
+            }
+
+            &.line-item-md::after {
+                content: "Med.";
+            }
+
+            &.line-item-lg::after {
+                content: "Large";
+            }
+
+            &.line-item-mg::after {
+                content: "Huge";
+            }
+
+            &.erase-item::after {
+                content: "Erase";
+            }
+        }
+    }
+}
