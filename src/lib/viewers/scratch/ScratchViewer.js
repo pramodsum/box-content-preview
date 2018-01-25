@@ -135,6 +135,7 @@ class ScratchViewer extends BaseViewer {
         this.canvas.resize(this.imageEl.width, this.imageEl.height);
         this.canvas.renderImage(this.imageEl);
         this.canvas.show();
+        this.canvas.setLineWidth(LINE_WIDTH.medium);
 
         this.scratchControls.on(CONTROL_EVENT.line.tiny, () => {
             this.canvas.setLineWidth(LINE_WIDTH.tiny);

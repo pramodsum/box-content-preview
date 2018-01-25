@@ -1,51 +1,89 @@
+@import '../../boxuiVariables';
+
 $not-black: rgb(45, 45, 45);
 $not-white: rgb(240, 240, 240);
 $open-white: rgb(200, 200, 200);
 
 .bp-scratch-viewer {
     .bp-scratch-controls {
+        background: $white;
+        border: 1px solid fade-out($better-black, .9);
+        border-top: 0px;
+        box-shadow: 0 1px 0 fade-out($white, .95) fade-out($better-black, .9);
+        font-family: Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 12px;
+        padding: 6px;
         position: absolute;
-        right: 5px;
-        top: 5px;
-        bottom: 5px;
+        right: 17px; // Prevents overlap with scroll-bar
+        top: 0px;
+        border-bottom-right-radius: 3px;
+        border-bottom-left-radius: 3px;
 
         .menu-item {
-            width: 40px;
-            height: 40px;
-            background-color: $not-white;
-            border-top: 1px solid $not-black;
-            cursor: pointer;
+            background: none;
+            display: inline-block;
+            height: 34px;
+            line-height: 1;
+            margin-top: -1px;
+            vertical-align: middle;
+            width: 34px;
+            padding: 6px;
 
-            &:hover {
-                background-color: $open-white;
+            .dot {
+            	background: $better-black;
+            	-moz-border-radius: 50%;
+            	-webkit-border-radius: 50%;
+            	border-radius: 50%;
             }
 
-            &.open {
-                background-color: $open-white;
+            &.line-item-sm > div {
+            	width: 10px;
+            	height: 10px;
+                margin: 6px 0 0 6px;
             }
 
-            &.open-item::after.open {
-                content: "Close";
+            &.line-item-md > div  {
+            	width: 13px;
+            	height: 13px;
+                margin: 4px 0 0 4px;
             }
 
-            &.line-item-sm::after {
-                content: "Small";
+            &.line-item-lg > div  {
+            	width: 16px;
+            	height: 16px;
+                margin: 2px 0 0 2px;
             }
 
-            &.line-item-md::after {
-                content: "Med.";
+            &.line-item-mg > div  {
+            	width: 19px;
+            	height: 19px;
             }
 
-            &.line-item-lg::after {
-                content: "Large";
-            }
-
-            &.line-item-mg::after {
-                content: "Huge";
-            }
-
-            &.erase-item::after {
+            &.erase-item {
                 content: "Erase";
+                padding-top: 4px
+            }
+
+            &.erase-item > svg {
+                margin-top: -2px;
+                fill: $better-black;
+            }
+
+            &.selected .dot {
+                background: fade-out($box-blue, .1);
+            }
+
+            &.selected > svg {
+                fill: fade-out($box-blue, .1);
+            }
+
+            &:hover .dot {
+                transition: background 0.2s ease-out;
+                background: fade-out($box-blue, .1);
+            }
+
+            &:hover > svg {
+                fill: fade-out($box-blue, .1);
             }
         }
     }
