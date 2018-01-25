@@ -1,13 +1,16 @@
 import BaseViewer from '../BaseViewer';
 import Browser from '../../Browser';
 import { VIEWER_EVENT } from '../../events';
-import { CLASS_INVISIBLE, PERMISSION_DOWNLOAD } from '../../constants';
+import { PERMISSION_DOWNLOAD } from '../../constants';
 import { get, appendQueryParams, getHeaders } from '../../util';
 import { checkPermission, getDownloadURL } from '../../file';
+import ScratchCanvas from './ScratchCanvas';
+import './ScratchViewer.scss';
 
 const CSS_CLASS_PANNING = 'panning';
 const CSS_CLASS_ZOOMABLE = 'zoomable';
 const CSS_CLASS_PANNABLE = 'pannable';
+const CSS_CLASS_SCRATCH_VIEWER = 'bp-scratch-viewer';
 
 class ScratchViewer extends BaseViewer {
     /** @inheritdoc */
@@ -70,11 +73,11 @@ class ScratchViewer extends BaseViewer {
         super.setup();
 
         this.wrapperEl = this.containerEl.appendChild(document.createElement('div'));
+        this.wrapperEl.classList.add(CSS_CLASS_SCRATCH_VIEWER);
 
-        this.imageEl = this.wrapperEl.appendChild(document.createElement('img'));
-
-        // hides image tag until content is loaded
-        this.imageEl.classList.add(CLASS_INVISIBLE);
+        this.imageEl = document.createElement('img');
+        this.canvas = new ScratchCanvas(this.wrapperEl);
+        this.canvas.hide();
     }
 
     /**
@@ -110,7 +113,9 @@ class ScratchViewer extends BaseViewer {
 
         this.loaded = true;
         this.emit(VIEWER_EVENT.load);
-        this.imageEl.classList.remove(CLASS_INVISIBLE);
+        this.canvas.resize();
+        this.canvas.renderImage(0, 0, this.imageEl);
+        this.canvas.show();
     }
 
     /**
