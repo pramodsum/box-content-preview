@@ -1,10 +1,10 @@
 import { CLASS_INVISIBLE } from '../../constants';
 
 export const LINE_WIDTH = {
-    tiny: 1,
-    medium: 2.5,
-    large: 5,
-    mega: 10
+    tiny: 2,
+    medium: 4,
+    large: 8,
+    mega: 16
 };
 
 class ScratchCanvas {
@@ -55,6 +55,16 @@ class ScratchCanvas {
         this.ctx.moveTo(srcX, srcY);
         this.ctx.quadraticCurveTo((srcX + dstX) / 2, (srcY + dstY) / 2, dstX, dstY);
         this.ctx.stroke();
+    }
+
+    erase(x, y) {
+        // this.ctx.clearRect(x - 8, y - 8, 16, 16);
+        this.ctx.save();
+        this.ctx.globalCompositeOperation = 'destination-out';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, this.lineWidth, 50, 0, 2 * Math.PI);
+        this.ctx.fill();
+        this.ctx.restore();
     }
 
     hide() {

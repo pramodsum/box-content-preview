@@ -15,7 +15,8 @@ const CSS_CLASS_SCRATCH_VIEWER = 'bp-scratch-viewer';
 
 const MODES = {
     none: 0,
-    line: 1
+    line: 1,
+    erase: 2
 };
 
 let lastX = 0;
@@ -24,7 +25,7 @@ let lastY = 0;
 let isDrawing = false;
 
 class ScratchViewer extends BaseViewer {
-    mode = MODES.none;
+    mode = MODES.line;
 
     /** @inheritdoc */
     constructor(options) {
@@ -136,12 +137,27 @@ class ScratchViewer extends BaseViewer {
         this.canvas.show();
 
         this.scratchControls.on(CONTROL_EVENT.line.tiny, () => {
-            this.canvas.setLineWidth(LINE_WIDTH.tiny)
+            this.canvas.setLineWidth(LINE_WIDTH.tiny);
             this.mode = MODES.line;
         });
 
-        this.scratchControls.on(CONTROL_EVENT.pan.toggle, () => {
-            this.mode = MODES.none;
+        this.scratchControls.on(CONTROL_EVENT.line.medium, () => {
+            this.canvas.setLineWidth(LINE_WIDTH.medium);
+            this.mode = MODES.line;
+        });
+
+        this.scratchControls.on(CONTROL_EVENT.line.large, () => {
+            this.canvas.setLineWidth(LINE_WIDTH.large);
+            this.mode = MODES.line;
+        });
+
+        this.scratchControls.on(CONTROL_EVENT.line.mega, () => {
+            this.canvas.setLineWidth(LINE_WIDTH.mega);
+            this.mode = MODES.line;
+        });
+
+        this.scratchControls.on(CONTROL_EVENT.erase.enable, () => {
+            this.mode = MODES.erase;
         });
     }
 
@@ -436,9 +452,12 @@ class ScratchViewer extends BaseViewer {
             case MODES.line:
                 this.canvas.bezierTo(lastX, lastY, offsetX, offsetY);
                 break;
+            case MODES.erase:
+                this.canvas.erase(offsetX, offsetY);
+                break;
             case MODES.none:
             default:
-                //
+            //
         }
 
         lastX = offsetX;

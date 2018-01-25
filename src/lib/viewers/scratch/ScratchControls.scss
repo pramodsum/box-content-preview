@@ -7,8 +7,7 @@ $open-white: rgb(200, 200, 200);
         position: absolute;
         right: 5px;
         top: 5px;
-        bottom: 95%;
-        overflow-y: hidden;
+        bottom: 5px;
 
         .menu-item {
             width: 40px;
@@ -25,37 +24,29 @@ $open-white: rgb(200, 200, 200);
                 background-color: $open-white;
             }
 
-            &.open-item::after {
-                content: "Open";
-            }
-
             &.open-item::after.open {
                 content: "Close";
             }
 
-            &.color-item::after {
-                content: "Color";
+            &.line-item-sm::after {
+                content: "Small";
             }
 
-            &.line-item::after {
-                content: "Line";
+            &.line-item-md::after {
+                content: "Med.";
             }
 
-            &.shape-item::after {
-                content: "Shape";
+            &.line-item-lg::after {
+                content: "Large";
             }
 
-            &.pan-item::after {
-                content: "Pan";
+            &.line-item-mg::after {
+                content: "Huge";
             }
 
             &.erase-item::after {
                 content: "Erase";
             }
-        }
-
-        &.open {
-            bottom: 5px;
         }
     }
 }
