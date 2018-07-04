@@ -1,11 +1,11 @@
 import BaseViewer from '../BaseViewer';
-import { createAssetUrlCreator, get } from '../../util';
-import { TEXT_STATIC_ASSETS_VERSION } from '../../constants';
+import Controls from '../../Controls';
+import { get } from '../../util';
 import './Excel.scss';
-import { ERROR_CODE, VIEWER_EVENT } from '../../events';
-import PreviewError from '../../PreviewError';
+import { VIEWER_EVENT } from '../../events';
+import { ICON_FULLSCREEN_IN, ICON_FULLSCREEN_OUT } from '../../icons/icons';
 
-const JS = [`third-party/text/${TEXT_STATIC_ASSETS_VERSION}/papaparse.min.js`, 'csv.js'];
+const JS = ['excel.js'];
 
 class ExcelViewer extends BaseViewer {
     /**
@@ -15,8 +15,7 @@ class ExcelViewer extends BaseViewer {
         // Call super() first to set up common layout
         super.setup();
 
-        this.csvEl = this.containerEl.appendChild(document.createElement('div'));
-        this.csvEl.className = 'bp-text bp-text-csv';
+        this.excelEl = this.containerEl.appendChild(document.createElement('div'));
     }
 
     /**
@@ -25,8 +24,8 @@ class ExcelViewer extends BaseViewer {
      * @return {void}
      */
     destroy() {
-        if (this.csvComponent) {
-            this.csvComponent.destroy();
+        if (this.excelComponent) {
+            this.excelComponent.destroy();
         }
         super.destroy();
     }
@@ -40,38 +39,33 @@ class ExcelViewer extends BaseViewer {
         this.setup();
         super.load();
 
-        const { representation, location } = this.options;
+        const { representation } = this.options;
         const template = representation.content.url_template;
-        const assetUrlCreator = createAssetUrlCreator(location);
-        const papaWorkerUrl = assetUrlCreator(JS[0]);
 
         return Promise.all([this.loadAssets(JS), this.getRepStatus().getPromise()])
             .then(() => {
-                get(papaWorkerUrl, 'blob').then((papaWorkerBlob) => {
-                    /* global Papa */
-                    const workerSrc = URL.createObjectURL(papaWorkerBlob);
-                    Papa.SCRIPT_PATH = workerSrc;
-
-                    this.startLoadTimer();
-                    const urlWithAuth = this.createContentUrlWithAuthParams(template);
-                    Papa.parse(urlWithAuth, {
-                        download: true,
-                        error: (err, file, inputElem, reason) => {
-                            const error = new PreviewError(ERROR_CODE.LOAD_CSV, __('error_refresh'), { reason });
-                            this.handleDownloadError(error, urlWithAuth);
-                        },
-                        complete: (results) => {
-                            if (this.isDestroyed() || !results) {
-                                return;
-                            }
-                            this.data = results.data;
-                            this.finishLoading();
-                            URL.revokeObjectURL(workerSrc);
-                        }
-                    });
-                });
+                this.startLoadTimer();
+                this.data = this.createContentUrlWithAuthParams(template);
+                this.finishLoading();
             })
             .catch(this.handleAssetError);
+    }
+
+    /**
+     * Loads controls for zooming and fullscreen.
+     *
+     * @return {void}
+     * @protected
+     */
+    loadUI() {
+        this.controls = new Controls(this.containerEl);
+        this.controls.add(
+            __('enter_fullscreen'),
+            this.toggleFullscreen,
+            'bp-enter-fullscreen-icon',
+            ICON_FULLSCREEN_IN
+        );
+        this.controls.add(__('exit_fullscreen'), this.toggleFullscreen, 'bp-exit-fullscreen-icon', ICON_FULLSCREEN_OUT);
     }
 
     /**
@@ -100,8 +94,8 @@ class ExcelViewer extends BaseViewer {
      * @return {void}
      */
     resize() {
-        if (this.csvComponent) {
-            this.csvComponent.renderCSV();
+        if (this.excelComponent) {
+            this.excelComponent.renderExcel();
         }
 
         super.resize();
@@ -114,9 +108,9 @@ class ExcelViewer extends BaseViewer {
      * @return {void}
      */
     finishLoading() {
-        /* global BoxCSV */
-        this.csvComponent = new BoxCSV(this.csvEl, this.data);
-        this.csvComponent.renderCSV();
+        /* global BoxExcel */
+        this.excelComponent = new BoxExcel(this.excelEl, this.data);
+        this.excelComponent.renderExcel();
 
         this.loadUI();
         this.loaded = true;
