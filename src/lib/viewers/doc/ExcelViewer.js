@@ -44,9 +44,10 @@ class ExcelViewer extends BaseViewer {
 
         return Promise.all([this.loadAssets(JS), this.getRepStatus().getPromise()])
             .then(() => {
-                this.startLoadTimer();
-                this.data = this.createContentUrlWithAuthParams(template);
-                this.finishLoading();
+                get(this.createContentUrlWithAuthParams(template), 'blob').then((excelBlob) => {
+                    this.data = excelBlob;
+                    this.finishLoading();
+                });
             })
             .catch(this.handleAssetError);
     }

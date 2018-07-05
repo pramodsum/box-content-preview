@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import App from './BoxExcel/App';
 
 class BoxExcel {
     /**
@@ -33,7 +34,7 @@ class BoxExcel {
      * @private
      */
     renderExcel() {
-        this.gridComponent = render(<div>{this.data}</div>, this.excelEl);
+        this.gridComponent = render(<App data={this.data} />, this.excelEl);
     }
 }
 
