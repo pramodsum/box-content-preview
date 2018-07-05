@@ -15,7 +15,9 @@ class ExcelViewer extends BaseViewer {
         // Call super() first to set up common layout
         super.setup();
 
-        this.excelEl = this.containerEl.appendChild(document.createElement('div'));
+        this.excelEl = this.containerEl.appendChild(
+            document.createElement('div')
+        );
     }
 
     /**
@@ -31,6 +33,26 @@ class ExcelViewer extends BaseViewer {
     }
 
     /**
+     * Handles keyboard events for document viewer.
+     *
+     * @param {string} key - keydown key
+     * @param {Object} event - Key event
+     * @return {boolean} consumed or not
+     */
+    onKeydown(key) {
+        switch (key) {
+            case 'ArrowLeft':
+                break;
+            case 'ArrowRight':
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Loads a csv file.
      *
      * @return {void}
@@ -42,12 +64,17 @@ class ExcelViewer extends BaseViewer {
         const { representation } = this.options;
         const template = representation.content.url_template;
 
-        return Promise.all([this.loadAssets(JS), this.getRepStatus().getPromise()])
+        return Promise.all([
+            this.loadAssets(JS),
+            this.getRepStatus().getPromise()
+        ])
             .then(() => {
-                get(this.createContentUrlWithAuthParams(template), 'blob').then((excelBlob) => {
-                    this.data = excelBlob;
-                    this.finishLoading();
-                });
+                get(this.createContentUrlWithAuthParams(template), 'blob').then(
+                    (excelBlob) => {
+                        this.data = excelBlob;
+                        this.finishLoading();
+                    }
+                );
             })
             .catch(this.handleAssetError);
     }
@@ -66,7 +93,12 @@ class ExcelViewer extends BaseViewer {
             'bp-enter-fullscreen-icon',
             ICON_FULLSCREEN_IN
         );
-        this.controls.add(__('exit_fullscreen'), this.toggleFullscreen, 'bp-exit-fullscreen-icon', ICON_FULLSCREEN_OUT);
+        this.controls.add(
+            __('exit_fullscreen'),
+            this.toggleFullscreen,
+            'bp-exit-fullscreen-icon',
+            ICON_FULLSCREEN_OUT
+        );
     }
 
     /**

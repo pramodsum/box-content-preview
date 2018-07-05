@@ -13,6 +13,8 @@ class BoxExcel {
     constructor(excelEl, data) {
         this.excelEl = excelEl;
         this.data = data;
+
+        this.excelEl.className = 'bp-excel-container';
     }
 
     /**
