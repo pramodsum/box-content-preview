@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import XLSX from 'xlsx';
 import LoadingIndicator from 'box-react-ui/lib/components/loading-indicator';
+import DataGrids from './dataGrids';
 
 class App extends Component {
     constructor(props) {
@@ -37,7 +38,11 @@ class App extends Component {
 
     render() {
         const { workbook } = this.state;
-        return _.isEmpty(workbook) ? <LoadingIndicator /> : <div>hello world</div>;
+        return _.isEmpty(workbook) ? (
+            <LoadingIndicator />
+        ) : (
+            <DataGrids workbook={workbook} />
+        );
     }
 }
 
