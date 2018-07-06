@@ -2,27 +2,6 @@ import moment from 'moment';
 import _ from 'lodash';
 import { specialIndexMap } from './colors';
 
-export function num2Chars(number) {
-    let baseChar = 'A'.charCodeAt(0),
-        letters = '';
-
-    do {
-        number -= 1;
-        letters = String.fromCharCode(baseChar + (number % 26)) + letters;
-        number = (number / 26) >> 0; // quick `floor`
-    } while (number > 0);
-
-    return letters;
-}
-
-export function dateConvertor(rawDate, rawFormat) {
-    const date = moment(rawDate);
-    const format = _.map(rawFormat, (c) => (dateMap[c] ? dateMap[c] : c)).join(
-        ''
-    );
-    return date.format(format);
-}
-
 export const dateMap = {
     m: 'M',
     d: 'D',
@@ -30,6 +9,24 @@ export const dateMap = {
     a: 'd'
 };
 
+/**
+ * [dateConvertor description]
+ * @param  {string} rawDate   [description]
+ * @param  {string} rawFormat [description]
+ * @return {string}           [description]
+ */
+export function dateConvertor(rawDate, rawFormat) {
+    const date = moment(rawDate);
+    const format = _.map(rawFormat, (c) => (dateMap[c] ? dateMap[c] : c)).join('');
+    return date.format(format);
+}
+
+/**
+ * [_getVertAlign description]
+ * @param       {[type]} align [description]
+ * @constructor
+ * @return      {[type]}       [description]
+ */
 export function _getVertAlign(align) {
     switch (align) {
         case 'center':
@@ -41,6 +38,12 @@ export function _getVertAlign(align) {
     }
 }
 
+/**
+ * [_getHoriAlign description]
+ * @param       {[type]} align [description]
+ * @constructor
+ * @return      {[type]}       [description]
+ */
 export function _getHoriAlign(align) {
     switch (align) {
         case 'right':
@@ -52,22 +55,23 @@ export function _getHoriAlign(align) {
     }
 }
 
+/**
+ * [_parseColor description]
+ * @param       {[type]} color [description]
+ * @constructor
+ * @return      {[type]}       [description]
+ */
 export function _parseColor(color) {
     const specialColor = color.index ? specialIndexMap[color.index] : null;
     return specialColor || `#${color.rgb}`;
 }
 
-export function _getBackgroundColor(index, fontColor) {
-    return isClose(specialIndexMap[index], fontColor)
-        ? findBetterColor(index, fontColor)
-        : specialIndexMap[index];
-}
-
-export const borderWidthMap = {
-    thin: '1px',
-    thick: '2px'
-};
-
+/**
+ * [isClose description]
+ * @param  {[type]}  color1 [description]
+ * @param  {[type]}  color2 [description]
+ * @return {boolean}        [description]
+ */
 export function isClose(color1, color2) {
     const rrggbb = _.map(
         [
@@ -90,6 +94,12 @@ export function isClose(color1, color2) {
     return Math.sqrt(sum) < 256;
 }
 
+/**
+ * [findBetterColor description]
+ * @param  {[type]} index     [description]
+ * @param  {[type]} fontColor [description]
+ * @return {[type]}           [description]
+ */
 export function findBetterColor(index, fontColor) {
     let currentIndex = index - 1;
     while (currentIndex !== index) {
@@ -101,3 +111,19 @@ export function findBetterColor(index, fontColor) {
     // console.log(specialIndexMap[index]);
     return specialIndexMap[index];
 }
+
+/**
+ * [_getBackgroundColor description]
+ * @param       {[type]} index     [description]
+ * @param       {[type]} fontColor [description]
+ * @constructor
+ * @return      {[type]}           [description]
+ */
+export function _getBackgroundColor(index, fontColor) {
+    return isClose(specialIndexMap[index], fontColor) ? findBetterColor(index, fontColor) : specialIndexMap[index];
+}
+
+export const borderWidthMap = {
+    thin: '1px',
+    thick: '2px'
+};

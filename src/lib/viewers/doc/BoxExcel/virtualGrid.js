@@ -9,17 +9,11 @@ import Draggable from 'react-draggable';
 import Immutable from 'immutable';
 import XLSX from 'xlsx';
 import { Parser as HtmlToReactParser } from 'html-to-react';
+import PropTypes from 'prop-types';
 import c from './colors';
 import Charts from './charts';
 import { HEADER_WIDTH, HEADER_HEIGHT, COLUMN_WIDTH, ROW_HEIGHT } from './const';
-import {
-    _getVertAlign,
-    _getHoriAlign,
-    _parseColor,
-    _getBackgroundColor,
-    borderWidthMap,
-    dateConvertor
-} from './utils';
+import { _getVertAlign, _getHoriAlign, _parseColor, _getBackgroundColor, borderWidthMap, dateConvertor } from './utils';
 
 const styles = {
     grids: {
@@ -77,6 +71,12 @@ const styles = {
 };
 
 class VirtualGrid extends Component {
+    propTypes = {
+        sheet: PropTypes.Object.isRequired,
+        views: PropTypes.Array.isRequired,
+        theme: PropTypes.Array.isRequired
+    };
+
     constructor(props) {
         super(props);
 
@@ -131,10 +131,7 @@ class VirtualGrid extends Component {
     componentWillUpdate(nextProps, nextState) {
         const { rowHeights, columnWidths } = this.state;
 
-        if (
-            rowHeights !== nextState.rowHeights ||
-            columnWidths !== nextState.columnWidths
-        ) {
+        if (rowHeights !== nextState.rowHeights || columnWidths !== nextState.columnWidths) {
             this._grid.recomputeGridSize();
         }
     }
@@ -188,11 +185,7 @@ class VirtualGrid extends Component {
 
     _isHidden = (rowIndex, columnIndex) => {
         const { rowHeights, columnWidths } = this.state;
-        if (
-            rowHeights.get(rowIndex) === 0 ||
-            columnWidths.get(columnIndex) === 0
-        )
-            return true;
+        if (rowHeights.get(rowIndex) === 0 || columnWidths.get(columnIndex) === 0) return true;
         return false;
     };
 
@@ -243,25 +236,13 @@ class VirtualGrid extends Component {
             sheet['!merges'].forEach((merge) => {
                 totalHeight = 0;
                 totalWidth = 0;
-                for (
-                    let rowIndex = merge.s.r;
-                    rowIndex <= merge.e.r;
-                    ++rowIndex
-                ) {
-                    for (
-                        let colIndex = merge.s.c;
-                        colIndex <= merge.e.c;
-                        ++colIndex
-                    ) {
+                for (let rowIndex = merge.s.r; rowIndex <= merge.e.r; ++rowIndex) {
+                    for (let colIndex = merge.s.c; colIndex <= merge.e.c; ++colIndex) {
                         merges[[rowIndex, colIndex]] = { display: 'none' };
                     }
                     totalHeight += rowHeights.get(rowIndex, rowHeight);
                 }
-                for (
-                    let colIndex = merge.s.c;
-                    colIndex <= merge.e.c;
-                    ++colIndex
-                ) {
+                for (let colIndex = merge.s.c; colIndex <= merge.e.c; ++colIndex) {
                     totalWidth += columnWidths.get(colIndex, columnWidth);
                 }
                 merges[[merge.s.r, merge.s.c]] = {
@@ -296,22 +277,18 @@ class VirtualGrid extends Component {
     };
 
     _getBorderWidth = (style) => {
-        return style && style.style && borderWidthMap[style.style]
-            ? borderWidthMap[style.style]
-            : '1px';
+        return style && style.style && borderWidthMap[style.style] ? borderWidthMap[style.style] : '1px';
     };
 
     _getBorder = (style) => {
-        const borderColor = `${this._getBorderColor(
-            style.top
-        )} ${this._getBorderColor(style.right)} ${this._getBorderColor(
-            style.bottom
-        )} ${this._getBorderColor(style.left)}`;
-        const borderWidth = `${
-            style.top ? this._getBorderWidth(style.top) : '0px'
-        } ${style.right ? this._getBorderWidth(style.right) : '1px'} ${
-            style.bottom ? this._getBorderWidth(style.bottom) : '1px'
-        } ${style.left ? this._getBorderWidth(style.left) : '0px'}`;
+        const borderColor = `${this._getBorderColor(style.top)} ${this._getBorderColor(
+            style.right
+        )} ${this._getBorderColor(style.bottom)} ${this._getBorderColor(style.left)}`;
+        const borderWidth = `${style.top ? this._getBorderWidth(style.top) : '0px'} ${
+            style.right ? this._getBorderWidth(style.right) : '1px'
+        } ${style.bottom ? this._getBorderWidth(style.bottom) : '1px'} ${
+            style.left ? this._getBorderWidth(style.left) : '0px'
+        }`;
         return { borderColor, borderWidth };
     };
 
@@ -331,23 +308,14 @@ class VirtualGrid extends Component {
         return cell.w;
     };
 
-    _cellRenderer = ({
-        columnIndex,
-        key,
-        rowIndex,
-        scrollToColumn,
-        scrollToRow,
-        style
-    }) => {
+    _cellRenderer = ({ columnIndex, key, rowIndex, scrollToColumn, scrollToRow, style }) => {
         const { merges, gridlines } = this.state;
         const cell = this._getCell(rowIndex, columnIndex);
         const isRowHeader = columnIndex === 0;
         const isColHeader = rowIndex === 0;
         const isHeader = isRowHeader || isColHeader;
-        const isFocus =
-            columnIndex === scrollToColumn && rowIndex === scrollToRow;
-        const fontColor =
-            cell && cell.s && cell.s.color ? `#${cell.s.color.rgb}` : '#000000';
+        const isFocus = columnIndex === scrollToColumn && rowIndex === scrollToRow;
+        const fontColor = cell && cell.s && cell.s.color ? `#${cell.s.color.rgb}` : '#000000';
         const cellStyle =
             cell && cell.s
                 ? {
@@ -362,10 +330,7 @@ class VirtualGrid extends Component {
                 ? {
                     backgroundColor: cell.s.fgColor.rgb
                         ? `#${cell.s.fgColor.rgb}`
-                        : _getBackgroundColor(
-                            cell.s.fgColor.indexed,
-                            fontColor
-                        )
+                        : _getBackgroundColor(cell.s.fgColor.indexed, fontColor)
                 }
                 : {};
         const cellBorder = cell && cell.s && this._getBorder(cell.s);
@@ -373,20 +338,14 @@ class VirtualGrid extends Component {
             ? { overflow: 'hidden', borderWidth: 0, padding: 0 }
             : {};
         const divNumber =
-            cell && (cell.t === 'n' || cell.t === 'd')
-                ? { justifyContent: 'flex-end', overflow: 'hidden' }
-                : {};
+            cell && (cell.t === 'n' || cell.t === 'd') ? { justifyContent: 'flex-end', overflow: 'hidden' } : {};
         const divAlign =
             cell && cell.s && cell.s.alignment
                 ? {
                     textAlign: cell.s.alignment.horizontal,
-                    justifyContent: _getHoriAlign(
-                        cell.s.alignment.horizontal
-                    ),
+                    justifyContent: _getHoriAlign(cell.s.alignment.horizontal),
                     alignItems: _getVertAlign(cell.s.alignment.vertical),
-                    whiteSpace: cell.s.alignment.wrapText
-                        ? 'initial'
-                        : 'nowrap',
+                    whiteSpace: cell.s.alignment.wrapText ? 'initial' : 'nowrap',
                     transform: cell.s.alignment.textRotation
                         ? `rotate(-${cell.s.alignment.textRotation}deg)`
                         : 'initial'
@@ -395,13 +354,7 @@ class VirtualGrid extends Component {
 
         const htmlToReactParser = new HtmlToReactParser();
         const commentHtml =
-            cell && cell.c ? (
-                <div>
-                    {_.map(cell.c, (comment) =>
-                        htmlToReactParser.parse(comment.h)
-                    )}
-                </div>
-            ) : null;
+            cell && cell.c ? <div>{_.map(cell.c, (comment) => htmlToReactParser.parse(comment.h))}</div> : null;
 
         const divContent = (
             <div
@@ -419,6 +372,7 @@ class VirtualGrid extends Component {
             </div>
         );
 
+        /* eslint-disable */
         return (
             <div
                 key={key}
@@ -444,11 +398,7 @@ class VirtualGrid extends Component {
                 }
             >
                 {commentHtml ? (
-                    <Tooltip
-                        text={commentHtml}
-                        position='middle-right'
-                        className='CommentTooltip'
-                    >
+                    <Tooltip text={commentHtml} position="middle-right" className="CommentTooltip">
                         {divContent}
                     </Tooltip>
                 ) : (
@@ -457,15 +407,11 @@ class VirtualGrid extends Component {
                 {isHeader && (
                     <Draggable
                         axis={isRowHeader ? 'y' : 'x'}
-                        defaultClassName={
-                            isRowHeader ? 'DragHandle' : 'DragHandleCol'
-                        }
+                        defaultClassName={isRowHeader ? 'DragHandle' : 'DragHandleCol'}
                         onDrag={(event, data) =>
                             this._resizeHeader({
                                 delta: isRowHeader ? data.deltaY : data.deltaX,
-                                index: isRowHeader
-                                    ? rowIndex - 1
-                                    : columnIndex - 1,
+                                index: isRowHeader ? rowIndex - 1 : columnIndex - 1,
                                 isRowHeader
                             })
                         }
@@ -479,25 +425,26 @@ class VirtualGrid extends Component {
                             style={
                                 isRowHeader
                                     ? {
-                                        width: '100%',
-                                        height: 3,
-                                        position: 'absolute',
-                                        bottom: -2,
-                                        right: 0
-                                    }
+                                          width: '100%',
+                                          height: 3,
+                                          position: 'absolute',
+                                          bottom: -2,
+                                          right: 0
+                                      }
                                     : {
-                                        width: 3,
-                                        height: '100%',
-                                        position: 'absolute',
-                                        top: 0,
-                                        right: -2
-                                    }
+                                          width: 3,
+                                          height: '100%',
+                                          position: 'absolute',
+                                          top: 0,
+                                          right: -2
+                                      }
                             }
                         />
                     </Draggable>
                 )}
             </div>
         );
+        /* eslint-enable */
     };
 
     _selectCell = ({ scrollToColumn, scrollToRow }) => {
@@ -541,14 +488,10 @@ class VirtualGrid extends Component {
                                     enableFixedRowScroll
                                     fixedColumnCount={1}
                                     fixedRowCount={1}
-                                    columnWidth={({ index }) =>
-                                        this._getColumnWidth(index - 1)
-                                    }
+                                    columnWidth={({ index }) => this._getColumnWidth(index - 1)}
                                     estimatedColumnSize={columnWidth}
                                     columnCount={columnCount}
-                                    rowHeight={({ index }) =>
-                                        this._getRowHeight(index - 1)
-                                    }
+                                    rowHeight={({ index }) => this._getRowHeight(index - 1)}
                                     estimatedRowSize={rowHeight}
                                     rowCount={rowCount}
                                     style={styles.grids}
@@ -562,12 +505,7 @@ class VirtualGrid extends Component {
                                     onSectionRendered={onSectionRendered}
                                     scrollToColumn={scrollToColumn}
                                     scrollToRow={scrollToRow}
-                                    cellRenderer={({
-                                        columnIndex,
-                                        key,
-                                        rowIndex,
-                                        style
-                                    }) =>
+                                    cellRenderer={({ columnIndex, key, rowIndex, style }) =>
                                         this._cellRenderer({
                                             columnIndex,
                                             key,
