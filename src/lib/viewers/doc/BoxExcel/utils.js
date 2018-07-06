@@ -127,3 +127,129 @@ export const borderWidthMap = {
     thin: '1px',
     thick: '2px'
 };
+
+/* eslint-disable */
+/**
+ * [st description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function st(e) {
+    return e.replace(/^\$([A-Z])/, '$1');
+}
+
+/**
+ * [at description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function at(e) {
+    const r = st(e);
+    let t = 0;
+    let a = 0;
+    for (; a !== r.length; ++a) t = 26 * t + r.charCodeAt(a) - 64;
+    return t - 1;
+}
+
+/**
+ * [lt description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function lt(e) {
+    return e.replace(/(\$?[A-Z]*)(\$?\d*)/, '$1,$2').split(',');
+}
+
+/**
+ * [tt description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function tt(e) {
+    return e.replace(/\$(\d+)$/, '$1');
+}
+
+/**
+ * [qr description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function qr(e) {
+    return parseInt(tt(e), 10) - 1;
+}
+
+/**
+ * [ft description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function ft(e) {
+    const r = lt(e);
+    return { c: at(r[0]), r: qr(r[1]) };
+}
+
+/**
+ * [ct description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function ct(e) {
+    const r = e.split(':').map(ft);
+    return { s: r[0], e: r[r.length - 1] };
+}
+
+/**
+ * [nt description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function nt(e) {
+    let r = '';
+    for (++e; e; e = Math.floor((e - 1) / 26)) r = String.fromCharCode(((e - 1) % 26) + 65) + r;
+    return r;
+}
+
+/**
+ * [ot description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function ot(e) {
+    return nt(e.c) + et(e.r);
+}
+
+/**
+ * [et description]
+ * @param  {[type]} e [description]
+ * @return {[type]}   [description]
+ */
+function et(e) {
+    return `${e + 1}`;
+}
+
+/**
+ * [ht description]
+ * @param  {[type]} e [description]
+ * @param  {[type]} r [description]
+ * @return {[type]}   [description]
+ */
+function ht(e, r) {
+    if (typeof r === 'undefined' || typeof r === 'number') {
+        return ht(e.s, e.e);
+    }
+    if (typeof e !== 'string') e = ot(e);
+    if (typeof r !== 'string') r = ot(r);
+    return e === r ? e : `${e}:${r}`;
+}
+/* eslint-enable */
+
+export const utils = {
+    decode_cell: ft,
+    decode_col: at,
+    decode_range: ct,
+    decode_row: qr,
+    encode_cell: ot,
+    encode_col: nt,
+    encode_range: ht,
+    encode_row: et
+};
