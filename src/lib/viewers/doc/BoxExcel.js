@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import App from './BoxExcel/App';
+import DataGrids from './BoxExcel/dataGrids';
 
 class BoxExcel {
     /**
@@ -36,7 +36,7 @@ class BoxExcel {
      * @private
      */
     renderExcel() {
-        this.gridComponent = render(<App data={this.data} />, this.excelEl);
+        this.gridComponent = render(<DataGrids workbook={this.data} />, this.excelEl);
     }
 }
 

@@ -4,8 +4,14 @@ import { get } from '../../util';
 import './Excel.scss';
 import { VIEWER_EVENT } from '../../events';
 import { ICON_FULLSCREEN_IN, ICON_FULLSCREEN_OUT } from '../../icons/icons';
+import { DOC_STATIC_ASSETS_VERSION } from '../../constants';
 
-const JS = ['excel.js'];
+const JS = [
+    `third-party/doc/${DOC_STATIC_ASSETS_VERSION}/cpexcel.js`,
+    `third-party/doc/${DOC_STATIC_ASSETS_VERSION}/jszip.js`,
+    `third-party/doc/${DOC_STATIC_ASSETS_VERSION}/xlsx.full.min.js`,
+    'excel.js'
+];
 
 class ExcelViewer extends BaseViewer {
     /**
@@ -15,9 +21,7 @@ class ExcelViewer extends BaseViewer {
         // Call super() first to set up common layout
         super.setup();
 
-        this.excelEl = this.containerEl.appendChild(
-            document.createElement('div')
-        );
+        this.excelEl = this.containerEl.appendChild(document.createElement('div'));
     }
 
     /**
@@ -33,10 +37,9 @@ class ExcelViewer extends BaseViewer {
     }
 
     /**
-     * Handles keyboard events for document viewer.
+     * Disable ArrowLeft and ArrowRight for excel viewer.
      *
      * @param {string} key - keydown key
-     * @param {Object} event - Key event
      * @return {boolean} consumed or not
      */
     onKeydown(key) {
@@ -64,20 +67,31 @@ class ExcelViewer extends BaseViewer {
         const { representation } = this.options;
         const template = representation.content.url_template;
 
-        return Promise.all([
-            this.loadAssets(JS),
-            this.getRepStatus().getPromise()
-        ])
+        return Promise.all([this.loadAssets(JS), this.getRepStatus().getPromise()])
             .then(() => {
-                get(this.createContentUrlWithAuthParams(template), 'blob').then(
-                    (excelBlob) => {
-                        this.data = excelBlob;
-                        this.finishLoading();
-                    }
-                );
+                get(this.createContentUrlWithAuthParams(template), 'blob').then((excelBlob) => {
+                    this.startLoadTimer();
+                    /* global XLSX */
+                    const fileReader = new FileReader();
+                    fileReader.readAsArrayBuffer(excelBlob);
+                    fileReader._parseBuffer = this._parseBuffer;
+                    fileReader.onload = function onload() {
+                        this._parseBuffer(this.result);
+                    };
+                });
             })
             .catch(this.handleAssetError);
     }
+
+    _parseBuffer = (buffer) => {
+        this.data = XLSX.read(buffer, {
+            type: 'array',
+            cellStyles: true,
+            cellNF: true,
+            cellDates: true
+        });
+        this.finishLoading();
+    };
 
     /**
      * Loads controls for zooming and fullscreen.
@@ -93,12 +107,7 @@ class ExcelViewer extends BaseViewer {
             'bp-enter-fullscreen-icon',
             ICON_FULLSCREEN_IN
         );
-        this.controls.add(
-            __('exit_fullscreen'),
-            this.toggleFullscreen,
-            'bp-exit-fullscreen-icon',
-            ICON_FULLSCREEN_OUT
-        );
+        this.controls.add(__('exit_fullscreen'), this.toggleFullscreen, 'bp-exit-fullscreen-icon', ICON_FULLSCREEN_OUT);
     }
 
     /**

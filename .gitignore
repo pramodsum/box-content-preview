@@ -11,3 +11,6 @@ src/i18n/json
 jsconfig.json
 functional-tests/output
 yarn-error.log
+src/third-party/doc/1.17.0/cpexcel.js
+src/third-party/doc/1.17.0/xlsx.full.min.js
+src/third-party/doc/1.17.0/jszip.js
