@@ -7,8 +7,9 @@ import PropTypes from 'prop-types';
 import VirtualGrid from './virtualGrid';
 
 class DataGrids extends PureComponent {
-    propTypes = {
-        workbook: PropTypes.Object.isRequired
+    static propTypes = {
+        // eslint-disable-next-line
+        workbook: PropTypes.object.isRequired
     };
 
     render() {

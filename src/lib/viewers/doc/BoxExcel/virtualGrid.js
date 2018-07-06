@@ -7,13 +7,20 @@ import Tooltip from 'box-react-ui/lib/components/tooltip';
 import { ArrowKeyStepper, MultiGrid, AutoSizer } from 'react-virtualized';
 import Draggable from 'react-draggable';
 import Immutable from 'immutable';
-import XLSX from 'xlsx';
 import { Parser as HtmlToReactParser } from 'html-to-react';
 import PropTypes from 'prop-types';
 import c from './colors';
 import Charts from './charts';
 import { HEADER_WIDTH, HEADER_HEIGHT, COLUMN_WIDTH, ROW_HEIGHT } from './const';
-import { _getVertAlign, _getHoriAlign, _parseColor, _getBackgroundColor, borderWidthMap, dateConvertor } from './utils';
+import {
+    _getVertAlign,
+    _getHoriAlign,
+    _parseColor,
+    _getBackgroundColor,
+    borderWidthMap,
+    dateConvertor,
+    utils
+} from './utils';
 
 const styles = {
     grids: {
@@ -71,11 +78,13 @@ const styles = {
 };
 
 class VirtualGrid extends Component {
-    propTypes = {
-        sheet: PropTypes.Object.isRequired,
-        views: PropTypes.Array.isRequired,
-        theme: PropTypes.Array.isRequired
+    /* eslint-disable */
+    static propTypes = {
+        sheet: PropTypes.object.isRequired,
+        views: PropTypes.array.isRequired,
+        theme: PropTypes.array.isRequired
     };
+    /* eslint-enable */
 
     constructor(props) {
         super(props);
@@ -198,7 +207,7 @@ class VirtualGrid extends Component {
         let columnCount = 0;
 
         if (sheet['!ref']) {
-            const { e } = XLSX.utils.decode_range(sheet['!ref']);
+            const { e } = utils.decode_range(sheet['!ref']);
             rowCount = e.r + 2;
             columnCount = e.c + 2;
         }
@@ -264,7 +273,7 @@ class VirtualGrid extends Component {
     };
 
     _getCell = (rowIndex, columnIndex) => {
-        const pos = XLSX.utils.encode_cell({
+        const pos = utils.encode_cell({
             r: rowIndex - 1,
             c: columnIndex - 1
         });
@@ -296,7 +305,7 @@ class VirtualGrid extends Component {
         if (rowIndex === 0 && columnIndex === 0) {
             return '';
         } else if (rowIndex === 0) {
-            return XLSX.utils.encode_col(columnIndex - 1);
+            return utils.encode_col(columnIndex - 1);
         } else if (columnIndex === 0) {
             return rowIndex;
         }

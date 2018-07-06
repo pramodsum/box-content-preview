@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { Bar, Pie, Doughnut } from 'react-chartjs-2';
-import XLSX from 'xlsx';
 import PropTypes from 'prop-types';
+import { utils } from './utils';
 import { HEADER_WIDTH, HEADER_HEIGHT } from './const';
 
 const chartTypeMap = {
@@ -17,10 +17,12 @@ const legendMap = {
 };
 
 class Charts extends Component {
-    propTypes = {
-        sheet: PropTypes.Object.isRequired,
-        themeColors: PropTypes.Array.isRequired
+    /* eslint-disable */
+    static propTypes = {
+        sheet: PropTypes.object.isRequired,
+        themeColors: PropTypes.array.isRequired
     };
+    /* eslint-enable */
 
     constructor(props) {
         super(props);
@@ -32,14 +34,14 @@ class Charts extends Component {
     }
 
     _getRawData = (chart, subPlot, counter) => {
-        const { e } = XLSX.utils.decode_range(chart['!ref']);
+        const { e } = utils.decode_range(chart['!ref']);
         const rowCount = e.r + 1;
         let subLabels = [];
         const subData = [];
         let newCounter = counter;
         subPlot.forEach((k) => {
             for (let r = 0; r < rowCount; ++r) {
-                const pos = XLSX.utils.encode_cell({
+                const pos = utils.encode_cell({
                     c: counter,
                     r
                 });
