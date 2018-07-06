@@ -19,11 +19,13 @@
     z-index: 2;
 }
 
+/* stylelint-disable */
 .CommentTooltip {
     background-color: #ffffe1 !important;
     border-color: #ffffe1 !important;
     color: #000 !important;
 }
+/* eslint-enable */
 
 .divComment::after {
     border-color: transparent;
