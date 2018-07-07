@@ -328,7 +328,7 @@ class VirtualGrid extends Component {
                     fontWeight: cell.s.bold ? 'bold' : 'normal'
                 }
                 : {};
-        const cellBgColor =
+        let cellBgColor =
             cell && cell.s && cell.s.fgColor && cell.s.patternType
                 ? {
                     backgroundColor: cell.s.fgColor.rgb
@@ -336,6 +336,7 @@ class VirtualGrid extends Component {
                         : _getBackgroundColor(cell.s.fgColor.indexed, fontColor)
                 }
                 : {};
+        cellBgColor = cell ? { backgroundColor: 'white' } : {};
         const cellBorder = cell && cell.s && this._getBorder(cell.s);
         const cellHidden = this._isHidden(rowIndex - 1, columnIndex - 1)
             ? { overflow: 'hidden', borderWidth: 0, padding: 0 }
