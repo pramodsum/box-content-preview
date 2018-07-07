@@ -1,8 +1,4 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
-
-import 'react-virtualized/styles.css';
-import LoadingIndicator from 'box-react-ui/lib/components/loading-indicator';
 import Tooltip from 'box-react-ui/lib/components/tooltip';
 import { ArrowKeyStepper, MultiGrid, AutoSizer } from 'react-virtualized';
 import Draggable from 'react-draggable';
@@ -47,7 +43,8 @@ const styles = {
         borderColor: c.gridGrey,
         fontSize: 12,
         float: 'leftbottom',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        lineHeight: 'normal'
     },
     headerBorder: {
         borderWidth: '0 1px 1px 0',
@@ -146,10 +143,7 @@ class VirtualGrid extends Component {
     }
 
     _parseThemeColors = (theme) => {
-        return _.chain(theme)
-            .filter(({ name }) => name.includes('accent'))
-            .map(({ rgb }) => `#${rgb}`)
-            .value();
+        return theme.filter(({ name }) => name.includes('accent')).map(({ rgb }) => `#${rgb}`);
     };
 
     _parseSettings = (views) => {
@@ -363,7 +357,7 @@ class VirtualGrid extends Component {
 
         const htmlToReactParser = new HtmlToReactParser();
         const commentHtml =
-            cell && cell.c ? <div>{_.map(cell.c, (comment) => htmlToReactParser.parse(comment.h))}</div> : null;
+            cell && cell.c ? <div>{cell.c.map((comment) => htmlToReactParser.parse(comment.h))}</div> : null;
 
         const divContent = (
             <div
@@ -473,9 +467,7 @@ class VirtualGrid extends Component {
             themeColors
         } = this.state;
 
-        return _.isEmpty(sheet) ? (
-            <LoadingIndicator />
-        ) : (
+        return (
             <div style={{ position: 'relative', height: '100%' }}>
                 <AutoSizer>
                     {({ width, height }) => (
@@ -529,7 +521,7 @@ class VirtualGrid extends Component {
                         </ArrowKeyStepper>
                     )}
                 </AutoSizer>
-                <Charts sheet={sheet} zoom={zoom} themeColors={themeColors} />
+                {sheet['!charts'] && <Charts sheet={sheet} zoom={zoom} themeColors={themeColors} />}
             </div>
         );
     }

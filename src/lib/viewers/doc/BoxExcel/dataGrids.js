@@ -1,6 +1,4 @@
 import React, { PureComponent } from 'react';
-import _ from 'lodash';
-
 import Tab from 'box-react-ui/lib/components/tab-view/Tab';
 import TabView from 'box-react-ui/lib/components/tab-view/TabView';
 import PropTypes from 'prop-types';
@@ -17,16 +15,13 @@ class DataGrids extends PureComponent {
 
         const wbSettings = workbook.Workbook;
 
-        const nonHiddenSheetsNames = _.chain(wbSettings.Sheets)
-            .filter((s) => s.Hidden === 0)
-            .map((s) => s.name)
-            .value();
+        const nonHiddenSheetsNames = wbSettings.Sheets.filter((s) => s.Hidden === 0).map((s) => s.name);
 
         const colorScheme = workbook.Themes ? workbook.Themes.themeElements.clrScheme : [];
 
         return (
             <TabView className='full-height'>
-                {_.map(nonHiddenSheetsNames, (name) => {
+                {nonHiddenSheetsNames.map((name) => {
                     return (
                         <Tab key={name} title={name}>
                             <VirtualGrid sheet={workbook.Sheets[name]} views={wbSettings.Views} theme={colorScheme} />

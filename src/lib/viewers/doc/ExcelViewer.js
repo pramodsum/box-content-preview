@@ -71,7 +71,6 @@ class ExcelViewer extends BaseViewer {
             .then(() => {
                 get(this.createContentUrlWithAuthParams(template), 'blob').then((excelBlob) => {
                     this.startLoadTimer();
-                    /* global XLSX */
                     const fileReader = new FileReader();
                     fileReader.readAsArrayBuffer(excelBlob);
                     fileReader._parseBuffer = this._parseBuffer;
@@ -84,6 +83,7 @@ class ExcelViewer extends BaseViewer {
     }
 
     _parseBuffer = (buffer) => {
+        /* global XLSX */
         this.data = XLSX.read(buffer, {
             type: 'array',
             cellStyles: true,

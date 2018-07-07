@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
 import { Bar, Pie, Doughnut } from 'react-chartjs-2';
 import PropTypes from 'prop-types';
 import { utils } from './utils';
@@ -29,7 +28,7 @@ class Charts extends Component {
 
         const { sheet } = this.props;
         this.state = {
-            charts: _.map(sheet['!charts'], this._parseChart)
+            charts: sheet['!charts'].map(this._parseChart)
         };
     }
 
@@ -39,21 +38,21 @@ class Charts extends Component {
         let subLabels = [];
         const subData = [];
         let newCounter = counter;
-        subPlot.forEach((k) => {
+        subPlot.forEach((key) => {
             for (let r = 0; r < rowCount; ++r) {
                 const pos = utils.encode_cell({
-                    c: counter,
+                    c: newCounter,
                     r
                 });
-                if (subPlot[k] === 'cat') {
+                if (key === 'cat') {
                     subLabels.push(chart[pos].v);
-                } else if (subPlot[k] === 'val') {
+                } else if (key === 'val') {
                     subData.push(chart[pos].v);
                 }
             }
             newCounter += 1;
         });
-        if (_.isEmpty(subLabels)) subLabels = _.range(1, subData.length + 1);
+        if (!subLabels.length) subLabels = Array.from({ length: subData.length }, (_, i) => i + 1);
 
         return { subLabels, subData, newCounter };
     };
@@ -73,26 +72,26 @@ class Charts extends Component {
         const yAxes = [];
         const plots = chart['!plot'];
         let subPlots = [];
-        Object.keys(plots).forEach((i) => {
-            subPlots = plots[i].ser;
+        plots.forEach((plot, i) => {
+            subPlots = plot.ser;
             const yAxisID = subPlots[0].names ? subPlots[0].names[0] : `Series${i}`;
             if (!title && subPlots[0].names) title = yAxisID;
             yAxes.push({
                 display: this._displayAxes(chartType),
                 id: yAxisID,
                 type: 'linear',
-                position: _.isEmpty(yAxes) ? 'left' : 'right',
+                position: !yAxes.length ? 'left' : 'right',
                 ticks: {
                     beginAtZero: true
                 }
             });
-            Object.keys(subPlots).forEach((j) => {
-                const { subLabels, subData, newCounter } = this._getRawData(chart, plots[i].k[j], counter);
+            subPlots.forEach((subplot, j) => {
+                const { subLabels, subData, newCounter } = this._getRawData(chart, plot.k[j], counter);
                 counter = newCounter;
                 rawDatasets.push({
-                    label: subPlots[j].names ? subPlots[j].names[0] : `Series${i}`,
+                    label: subplot.names ? subplot.names[0] : `Series${i}`,
                     yAxisID,
-                    type: plots[i].t,
+                    type: plot.t,
                     subLabels,
                     subData
                 });
@@ -100,7 +99,7 @@ class Charts extends Component {
         });
 
         const { themeColors } = this.props;
-        const datasets = _.map(rawDatasets, ({ label, type, subData, yAxisID }, index) => ({
+        const datasets = rawDatasets.map(({ label, type, subData, yAxisID }, index) => ({
             label,
             type,
             data: subData,
@@ -111,7 +110,7 @@ class Charts extends Component {
             borderColor: type === 'line' ? themeColors[index] : 'white'
         }));
 
-        const labels = !_.isEmpty(rawDatasets) ? rawDatasets[0].subLabels : [];
+        const labels = rawDatasets.length ? rawDatasets[0].subLabels : [];
 
         return {
             type: chartType,
@@ -146,10 +145,10 @@ class Charts extends Component {
 
     render() {
         const { charts } = this.state;
-
+        /* eslint-disable */
         return (
             <div style={{ width: '100%', position: 'absolute', top: 0, left: 0 }}>
-                {_.map(charts, (chart, idx) => {
+                {charts.map((chart, idx) => {
                     const ChartType = chartTypeMap[chart.type];
                     return (
                         <div
@@ -159,7 +158,6 @@ class Charts extends Component {
                                 top: chart.position.y + HEADER_HEIGHT,
                                 height: chart.height,
                                 width: chart.width,
-                                // border: '1px solid grey',
                                 backgroundColor: 'white'
                             }}
                             key={idx}
@@ -170,6 +168,7 @@ class Charts extends Component {
                 })}
             </div>
         );
+        /* eslint-enable */
     }
 }
 

@@ -1,6 +1,7 @@
-@import '../../boxuiVariables';
+@import '~react-virtualized/styles.css';
 
 .bp-excel-container {
+    background-color: white;
     height: 100%;
     width: 100%;
 }

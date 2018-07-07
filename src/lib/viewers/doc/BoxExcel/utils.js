@@ -1,5 +1,4 @@
 import moment from 'moment';
-import _ from 'lodash';
 import { specialIndexMap } from './colors';
 
 export const dateMap = {
@@ -17,7 +16,7 @@ export const dateMap = {
  */
 export function dateConvertor(rawDate, rawFormat) {
     const date = moment(rawDate);
-    const format = _.map(rawFormat, (c) => (dateMap[c] ? dateMap[c] : c)).join('');
+    const format = rawFormat.map((c) => (dateMap[c] ? dateMap[c] : c)).join('');
     return date.format(format);
 }
 
@@ -73,17 +72,14 @@ export function _parseColor(color) {
  * @return {boolean}        [description]
  */
 export function isClose(color1, color2) {
-    const rrggbb = _.map(
-        [
-            color1.substr(1, 2),
-            color2.substr(1, 2),
-            color1.substr(3, 2),
-            color2.substr(3, 2),
-            color1.substr(5, 2),
-            color2.substr(5, 2)
-        ],
-        (hex) => parseInt(hex, 16)
-    );
+    const rrggbb = [
+        color1.substr(1, 2),
+        color2.substr(1, 2),
+        color1.substr(3, 2),
+        color2.substr(3, 2),
+        color1.substr(5, 2),
+        color2.substr(5, 2)
+    ].map((hex) => parseInt(hex, 16));
 
     let sum = 0;
     for (let i = 0; i < rrggbb.length; i += 2) {
