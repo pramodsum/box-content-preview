@@ -7,8 +7,8 @@ class BoxExcel {
      * [constructor]
      *
      * @param {HTMLElement} excelEl - Excel element
-     * @param {Object} data - CSV data
-     * @return {BoxCSV} Instance
+     * @param {Object} data - Excel data parsed by sheetjs
+     * @return {BoxExcel} Instance
      */
     constructor(excelEl, data) {
         this.excelEl = excelEl;
@@ -30,7 +30,7 @@ class BoxExcel {
     }
 
     /**
-     * Renders CSV into an html table
+     * Renders Excel
      *
      * @return {void}
      * @private

@@ -18,6 +18,10 @@ import {
     utils
 } from './utils';
 
+/**
+ * React styles object, like css-in-js
+ * @type {Object}
+ */
 const styles = {
     grids: {
         borderWidth: '1px 0 0 1px',
@@ -76,6 +80,11 @@ const styles = {
 
 class Sheet extends Component {
     /* eslint-disable */
+    /**
+     * sheet spreadsheet data
+     * views spreadsheet view settings
+     * theme spreadsheet color scheme
+     */
     static propTypes = {
         sheet: PropTypes.object.isRequired,
         views: PropTypes.array.isRequired,
@@ -83,9 +92,14 @@ class Sheet extends Component {
     };
     /* eslint-enable */
 
+    /**
+     * [constructor]
+     * @param {Object} props React element properties, see above
+     */
     constructor(props) {
         super(props);
 
+        // initial state values
         this.state = {
             sheet: null,
             rowCount: 0,
@@ -103,6 +117,10 @@ class Sheet extends Component {
         };
     }
 
+    /**
+     * Before rendering, parse dimention, settings, and theme
+     * @return {[type]} [description]
+     */
     componentWillMount() {
         // console.log('start rendering', performance.now());
         const { sheet, views, theme } = this.props;
@@ -134,6 +152,12 @@ class Sheet extends Component {
         });
     }
 
+    /**
+     * Triggered when resizing row or column
+     * @param  {Object} nextProps next property to change
+     * @param  {Object} nextState next state to change
+     * @return {void}
+     */
     componentWillUpdate(nextProps, nextState) {
         const { rowHeights, columnWidths } = this.state;
 
@@ -142,10 +166,22 @@ class Sheet extends Component {
         }
     }
 
+    /**
+     * Parse the theme colors, only need 'accent' for now
+     * @param  {Array} theme Array of objects consisting of colors
+     * @return {Array}       Array of hex color strings
+     */
     _parseThemeColors = (theme) => {
         return theme.filter(({ name }) => name.includes('accent')).map(({ rgb }) => `#${rgb}`);
     };
 
+    /**
+     * Parse the settings of the spreadsheet
+     * Currently, only get zoom ratio and girdlineVisibility,
+     * In the future, we can parse more for high fidelity
+     * @param  {Object} views View setting object
+     * @return {Object}       zoom ratio and girdlineVisibility
+     */
     _parseSettings = (views) => {
         const view = views[0];
         return {
@@ -154,18 +190,38 @@ class Sheet extends Component {
         };
     };
 
+    /**
+     * Get row height of a certain index
+     * Required for React-Virtualized
+     * @param  {number} index index number, 0 basis. -1 means header
+     * @return {number}       row height in px
+     */
     _getRowHeight = (index) => {
         if (index === -1) return HEADER_HEIGHT;
         const { rowHeights, rowHeight } = this.state;
         return rowHeights.get(index, rowHeight);
     };
 
+    /**
+     * Get column width for a certain index
+     * Required for React-Virtualized
+     * @param  {number} index index number, 0 basis. -1 means header
+     * @return {number}       column width in px
+     */
     _getColumnWidth = (index) => {
         if (index === -1) return HEADER_WIDTH;
         const { columnWidths, columnWidth } = this.state;
         return columnWidths.get(index, columnWidth);
     };
 
+    /**
+     * Triggered when resizing row or column.
+     * Calculate the new value and set in state
+     * @param  {number}  delta       Diff between original and new value
+     * @param  {numebr}  index       index number, 0 basis
+     * @param  {boolean} isRowHeader true if is resizing row, false if column
+     * @return {void}
+     */
     _resizeHeader = ({ delta, index, isRowHeader }) => {
         const { rowHeights, columnWidths } = this.state;
 
@@ -186,12 +242,26 @@ class Sheet extends Component {
         }
     };
 
+    /**
+     * Helper function to check if a row or column is hidden (0 px)
+     * @param  {number}  rowIndex    row index number, 0 basis
+     * @param  {number}  columnIndex col index number, 0 basis
+     * @return {boolean}             true if hidden, false if not
+     */
     _isHidden = (rowIndex, columnIndex) => {
         const { rowHeights, columnWidths } = this.state;
         if (rowHeights.get(rowIndex) === 0 || columnWidths.get(columnIndex) === 0) return true;
         return false;
     };
 
+    /**
+     * Parse the dimention of the spreadsheet, including
+     * special row height, special col width,
+     * total row numbers, total col numbers,
+     * and merged grids
+     * @param  {Object} sheet spreadsheet data
+     * @return {Object}       parsed data mentioned above
+     */
     _parseDimention = (sheet) => {
         let rowHeight;
         let columnWidth;
@@ -266,23 +336,44 @@ class Sheet extends Component {
         };
     };
 
+    /**
+     * Get data object for a certain position
+     * @param  {number} rowIndex    row index, 0 basis
+     * @param  {number} columnIndex col index, 0 basis
+     * @return {Object}             data object for the cell
+     */
     _getCell = (rowIndex, columnIndex) => {
         const pos = utils.encode_cell({
-            r: rowIndex - 1,
-            c: columnIndex - 1
+            r: rowIndex,
+            c: columnIndex
         });
         const { sheet } = this.state;
         return sheet[pos];
     };
 
+    /**
+     * Helper function of _getBorder
+     * @param  {Object} style style property in a cell object
+     * @return {string}       hex color string
+     */
     _getBorderColor = (style) => {
         return style && style.color ? _parseColor(style.color) : c.gridGrey;
     };
 
+    /**
+     * Helper function of _getBorder
+     * @param  {style} style style property in a cell object
+     * @return {string}      border width string, default: '1px'
+     */
     _getBorderWidth = (style) => {
         return style && style.style && borderWidthMap[style.style] ? borderWidthMap[style.style] : '1px';
     };
 
+    /**
+     * Get border style, including borderColor and borderWidth
+     * @param  {Object} style style property in a cell object
+     * @return {Object}       React style object
+     */
     _getBorder = (style) => {
         const borderColor = `${this._getBorderColor(style.top)} ${this._getBorderColor(
             style.right
@@ -295,6 +386,12 @@ class Sheet extends Component {
         return { borderColor, borderWidth };
     };
 
+    /**
+     * Get cell content
+     * @param  {[type]} rowIndex    [description]
+     * @param  {[type]} columnIndex [description]
+     * @return {[type]}             [description]
+     */
     _getCellContent = (rowIndex, columnIndex) => {
         if (rowIndex === 0 && columnIndex === 0) {
             return '';
@@ -311,11 +408,21 @@ class Sheet extends Component {
         return cell.w;
     };
 
-    _cellRenderer = ({ columnIndex, key, rowIndex, scrollToColumn, scrollToRow, style }) => {
+    /**
+     * Render single cell for at (rowIndex, columnIndex)
+     * @param  {[type]} key            cell key
+     * @param  {number} columnIndex    column index 0 basis, -1 means, header
+     * @param  {number} rowIndex       row index 0 basis, -1 means header
+     * @param  {number} scrollToColumn focused col index, 0 basis
+     * @param  {number} scrollToRow    focused row index, 0 basis
+     * @param  {Object} style          React style object
+     * @return {jsx}                   Rendered jsx
+     */
+    _cellRenderer = ({ key, columnIndex, rowIndex, scrollToColumn, scrollToRow, style }) => {
         const { merges, gridlines } = this.state;
         const cell = this._getCell(rowIndex, columnIndex);
-        const isRowHeader = columnIndex === 0;
-        const isColHeader = rowIndex === 0;
+        const isRowHeader = columnIndex === -1;
+        const isColHeader = rowIndex === -1;
         const isHeader = isRowHeader || isColHeader;
         const isFocus = columnIndex === scrollToColumn && rowIndex === scrollToRow;
         const fontColor = cell && cell.s && cell.s.color ? `#${cell.s.color.rgb}` : '#000000';
@@ -507,13 +614,14 @@ class Sheet extends Component {
                                     onSectionRendered={onSectionRendered}
                                     scrollToColumn={scrollToColumn}
                                     scrollToRow={scrollToRow}
-                                    cellRenderer={({ columnIndex, key, rowIndex, style }) =>
+                                    cellRenderer={({ key, columnIndex, rowIndex, style }) =>
                                         this._cellRenderer({
-                                            columnIndex,
                                             key,
-                                            rowIndex,
-                                            scrollToColumn,
-                                            scrollToRow,
+                                            // -1 to convert from 1 basis to 0 basis
+                                            columnIndex: columnIndex - 1,
+                                            rowIndex: rowIndex - 1,
+                                            scrollToColumn: scrollToColumn - 1,
+                                            scrollToRow: scrollToRow - 1,
                                             style
                                         })
                                     }
