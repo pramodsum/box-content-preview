@@ -74,7 +74,7 @@ const styles = {
     focusedDiv: {}
 };
 
-class VirtualGrid extends Component {
+class Sheet extends Component {
     /* eslint-disable */
     static propTypes = {
         sheet: PropTypes.object.isRequired,
@@ -528,4 +528,4 @@ class VirtualGrid extends Component {
     }
 }
 
-export default VirtualGrid;
+export default Sheet;

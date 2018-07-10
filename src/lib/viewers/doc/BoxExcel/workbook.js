@@ -2,9 +2,9 @@ import React, { PureComponent } from 'react';
 import Tab from 'box-react-ui/lib/components/tab-view/Tab';
 import TabView from 'box-react-ui/lib/components/tab-view/TabView';
 import PropTypes from 'prop-types';
-import VirtualGrid from './virtualGrid';
+import Sheet from './sheet';
 
-class DataGrids extends PureComponent {
+class Workbook extends PureComponent {
     static propTypes = {
         // eslint-disable-next-line
         workbook: PropTypes.object.isRequired
@@ -24,7 +24,7 @@ class DataGrids extends PureComponent {
                 {nonHiddenSheetsNames.map((name) => {
                     return (
                         <Tab key={name} title={name}>
-                            <VirtualGrid sheet={workbook.Sheets[name]} views={wbSettings.Views} theme={colorScheme} />
+                            <Sheet sheet={workbook.Sheets[name]} views={wbSettings.Views} theme={colorScheme} />
                         </Tab>
                     );
                 })}
@@ -33,4 +33,4 @@ class DataGrids extends PureComponent {
     }
 }
 
-export default DataGrids;
+export default Workbook;

@@ -36,7 +36,7 @@ function updateConfig(conf, language, index) {
             annotations: ['box-annotations'],
             preview: [`${lib}/Preview.js`],
             csv: [`${lib}/viewers/text/BoxCSV.js`],
-            excel: [`${lib}/viewers/doc/BoxExcel.js`]
+            excel: [`${lib}/viewers/doc/BoxExcel`]
         },
         output: {
             path: path.resolve('dist', version, language),
