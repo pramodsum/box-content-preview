@@ -1850,7 +1850,7 @@ class-utils@^0.3.5:
 
 classnames@^2.2.3, classnames@^2.2.5:
   version "2.2.6"
-  resolved "https://box.jfrog.io/box/api/npm/boxnpm/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
+  resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
 
 cli-cursor@^1.0.1, cli-cursor@^1.0.2:
   version "1.0.2"
@@ -4563,9 +4563,9 @@ immediate@~3.0.5:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.0.6.tgz#9db1dbd0faf8de6fbe0f5dd5e56bb606280de69b"
 
-immutable@^3.8.1:
+immutable@^3.8.2:
   version "3.8.2"
-  resolved "https://box.jfrog.io/box/api/npm/boxnpm/immutable/-/immutable-3.8.2.tgz#c2439951455bb39913daf281376f1530e104adf3"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.2.tgz#c2439951455bb39913daf281376f1530e104adf3"
 
 import-lazy@^3.1.0:
   version "3.1.0"
@@ -6175,7 +6175,7 @@ mojito-rb-gen@^0.0.1:
     mkdirp "^0.5.1"
     properties "^1.2.1"
 
-moment@^2.10.2:
+moment@^2.10.2, moment@^2.22.2:
   version "2.22.2"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
 
@@ -7661,7 +7661,7 @@ react-dom@^16.2.0:
 
 react-draggable@^3.0.5:
   version "3.0.5"
-  resolved "https://box.jfrog.io/box/api/npm/boxnpm/react-draggable/-/react-draggable-3.0.5.tgz#c031e0ed4313531f9409d6cd84c8ebcec0ddfe2d"
+  resolved "https://registry.yarnpkg.com/react-draggable/-/react-draggable-3.0.5.tgz#c031e0ed4313531f9409d6cd84c8ebcec0ddfe2d"
   dependencies:
     classnames "^2.2.5"
     prop-types "^15.6.0"
@@ -7670,9 +7670,9 @@ react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
 
-react-tether@^0.6.0:
-  version "0.6.1"
-  resolved "https://box.jfrog.io/box/api/npm/boxnpm/react-tether/-/react-tether-0.6.1.tgz#de64dd81a5e40053a9f275c4fef0beb0877b3e4e"
+react-tether@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/react-tether/-/react-tether-1.0.1.tgz#6e5173764d4f9b8bef6d1b20ff51972909674942"
   dependencies:
     prop-types "^15.5.8"
     tether "^1.4.3"
@@ -9118,7 +9118,7 @@ test-exclude@^4.2.1:
 
 tether@^1.4.3:
   version "1.4.4"
-  resolved "https://box.jfrog.io/box/api/npm/boxnpm/tether/-/tether-1.4.4.tgz#9dc6eb2b3e601da2098fd264e7f7a8b264de1125"
+  resolved "https://registry.yarnpkg.com/tether/-/tether-1.4.4.tgz#9dc6eb2b3e601da2098fd264e7f7a8b264de1125"
 
 text-encoding@^0.6.4:
   version "0.6.4"
