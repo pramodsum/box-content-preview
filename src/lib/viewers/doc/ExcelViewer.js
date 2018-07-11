@@ -56,7 +56,7 @@ class ExcelViewer extends BaseViewer {
     }
 
     /**
-     * Loads a csv file.
+     * Loads an excel file.
      *
      * @return {void}
      */
@@ -82,6 +82,11 @@ class ExcelViewer extends BaseViewer {
             .catch(this.handleAssetError);
     }
 
+    /**
+     * Parses an excel file.
+     * @param  {ArrayBuffer} buffer ArrayBuffer parsed by fileReader
+     * @return {void}
+     */
     _parseBuffer = (buffer) => {
         /* global XLSX */
         this.data = XLSX.read(buffer, {
@@ -94,7 +99,7 @@ class ExcelViewer extends BaseViewer {
     };
 
     /**
-     * Loads controls for zooming and fullscreen.
+     * Loads controls for fullscreen.
      *
      * @return {void}
      * @protected
@@ -111,7 +116,7 @@ class ExcelViewer extends BaseViewer {
     }
 
     /**
-     * Prefetches assets for CSV Viewer.
+     * Prefetches assets for Excel Viewer.
      *
      * @param {boolean} [options.assets] - Whether or not to prefetch static assets
      * @param {boolean} [options.content] - Whether or not to prefetch rep content
@@ -144,7 +149,7 @@ class ExcelViewer extends BaseViewer {
     }
 
     /**
-     * Finishes loading the csv data
+     * Finishes loading and parsing the excel data
      *
      * @private
      * @return {void}

@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import { Bar, Pie, Doughnut } from 'react-chartjs-2';
 import PropTypes from 'prop-types';
-import { utils } from './utils';
 import { HEADER_WIDTH, HEADER_HEIGHT } from './const';
 
+/**
+ * map chart type to React Component imported from 'react-chartjs-2'
+ *
+ * @type {Object}
+ */
 const chartTypeMap = {
     line: Bar,
     bar: Bar,
@@ -11,18 +15,34 @@ const chartTypeMap = {
     doughnut: Doughnut
 };
 
+/**
+ * map legend to chartjs-recognizable
+ *
+ * @type {Object}
+ */
 const legendMap = {
     b: 'bottom'
 };
 
 class Charts extends Component {
     /* eslint-disable */
+    /**
+     * sheet spreadsheet data
+     * themeColors array of colors
+     *
+     * @type {Object}
+     */
     static propTypes = {
         sheet: PropTypes.object.isRequired,
         themeColors: PropTypes.array.isRequired
     };
     /* eslint-enable */
 
+    /**
+     * [constructor]
+     *
+     * @param {Object} props [description]
+     */
     constructor(props) {
         super(props);
 
@@ -32,15 +52,25 @@ class Charts extends Component {
         };
     }
 
+    /**
+     * Helper function of _parseChart
+     * Re-organize the data of a subplot
+     *
+     * @param  {Object} chart   Chart object parsed from sheetjs
+     * @param  {Array} subPlot  'cat' means chart label, 'val' means chart data
+     * @param  {number} counter counter of the whole chart
+     * @return {Object}         labels and data of a subplot, and updated counter
+     */
     _getRawData = (chart, subPlot, counter) => {
-        const { e } = utils.decode_range(chart['!ref']);
+        /* global XLSX */
+        const { e } = XLSX.utils.decode_range(chart['!ref']);
         const rowCount = e.r + 1;
         let subLabels = [];
         const subData = [];
         let newCounter = counter;
         subPlot.forEach((key) => {
             for (let r = 0; r < rowCount; ++r) {
-                const pos = utils.encode_cell({
+                const pos = XLSX.utils.encode_cell({
                     c: newCounter,
                     r
                 });
@@ -57,10 +87,22 @@ class Charts extends Component {
         return { subLabels, subData, newCounter };
     };
 
+    /**
+     * Whether the chart should display Axes
+     *
+     * @param  {string} type chart type string
+     * @return {boolean}     true for certain types
+     */
     _displayAxes = (type) => {
         return !(type === 'pie' || type === 'doughnut');
     };
 
+    /**
+     * Re-organize sheetjs data to chartjs format
+     *
+     * @param  {Object} chart chart object parsed from sheetjs
+     * @return {Object}       chartjs needed properties
+     */
     _parseChart = (chart) => {
         const chartType = chart['!plot'][0].t;
         const position = chart['!pos'];
@@ -143,6 +185,11 @@ class Charts extends Component {
         };
     };
 
+    /**
+     * Render all the charts on a layer above spreadsheet
+     *
+     * @return {jsx} rendered jsx
+     */
     render() {
         const { charts } = this.state;
         /* eslint-disable */

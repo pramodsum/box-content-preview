@@ -1,6 +1,12 @@
 import moment from 'moment';
 import { specialIndexMap } from './colors';
 
+/**
+ * map dataFormat string from excel to moment
+ * need to add more in the future
+ *
+ * @type {Object}
+ */
 export const dateMap = {
     m: 'M',
     d: 'D',
@@ -9,10 +15,11 @@ export const dateMap = {
 };
 
 /**
- * [dateConvertor description]
- * @param  {string} rawDate   [description]
- * @param  {string} rawFormat [description]
- * @return {string}           [description]
+ * convert date to right format
+ *
+ * @param  {Date} rawDate     JS Date
+ * @param  {string} rawFormat Excel format
+ * @return {string}           Well Formatted Date
  */
 export function dateConvertor(rawDate, rawFormat) {
     const date = moment(rawDate);
@@ -21,10 +28,10 @@ export function dateConvertor(rawDate, rawFormat) {
 }
 
 /**
- * [_getVertAlign description]
- * @param       {[type]} align [description]
- * @constructor
- * @return      {[type]}       [description]
+ * translate vertical align format string
+ *
+ * @param       {string} align align format from excel
+ * @return      {string} align format for flexbox
  */
 export function _getVertAlign(align) {
     switch (align) {
@@ -38,10 +45,10 @@ export function _getVertAlign(align) {
 }
 
 /**
- * [_getHoriAlign description]
- * @param       {[type]} align [description]
- * @constructor
- * @return      {[type]}       [description]
+ * translate vertical align string
+ *
+ * @param       {[type]} align align format from excel
+ * @return      {[type]}       align format for flexbox
  */
 export function _getHoriAlign(align) {
     switch (align) {
@@ -55,10 +62,10 @@ export function _getHoriAlign(align) {
 }
 
 /**
- * [_parseColor description]
- * @param       {[type]} color [description]
- * @constructor
- * @return      {[type]}       [description]
+ * Get excel color hex string from color object of sheetjs
+ *
+ * @param       {Object} color color object parsed by sheetjs
+ * @return      {string}       hex color string
  */
 export function _parseColor(color) {
     const specialColor = color.index ? specialIndexMap[color.index] : null;
@@ -66,10 +73,12 @@ export function _parseColor(color) {
 }
 
 /**
- * [isClose description]
- * @param  {[type]}  color1 [description]
- * @param  {[type]}  color2 [description]
- * @return {boolean}        [description]
+ * Helper function of _getBackgroundColor
+ * Check whether two colors are close or not
+ *
+ * @param  {string}  color1 first color
+ * @param  {string}  color2 second color
+ * @return {boolean}        true if two colors are close
  */
 export function isClose(color1, color2) {
     const rrggbb = [
@@ -91,10 +100,13 @@ export function isClose(color1, color2) {
 }
 
 /**
- * [findBetterColor description]
- * @param  {[type]} index     [description]
- * @param  {[type]} fontColor [description]
- * @return {[type]}           [description]
+ * Helper function of _getBackgroundColor
+ * Find two colors not close from specialIndexMap
+ * Solve the problem that the backgroundColor and fontColor are too close
+ *
+ * @param  {number} index     excel index color, backgroundColor of a cell
+ * @param  {string} fontColor hex color string
+ * @return {string}           hex color string
  */
 export function findBetterColor(index, fontColor) {
     let currentIndex = index - 1;
@@ -104,148 +116,26 @@ export function findBetterColor(index, fontColor) {
         }
         currentIndex = (currentIndex - 1 + 64) % 64;
     }
-    // console.log(specialIndexMap[index]);
     return specialIndexMap[index];
 }
 
 /**
- * [_getBackgroundColor description]
- * @param       {[type]} index     [description]
- * @param       {[type]} fontColor [description]
- * @constructor
- * @return      {[type]}           [description]
+ * get backgroundColor of a cell
+ *
+ * @param       {number} index     excel color index
+ * @param       {string} fontColor hex color string
+ * @return      {string}           hex color string
  */
 export function _getBackgroundColor(index, fontColor) {
     return isClose(specialIndexMap[index], fontColor) ? findBetterColor(index, fontColor) : specialIndexMap[index];
 }
 
+/**
+ * map excel border width format to px
+ *
+ * @type {Object}
+ */
 export const borderWidthMap = {
     thin: '1px',
     thick: '2px'
-};
-
-/* eslint-disable */
-/**
- * [st description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function st(e) {
-    return e.replace(/^\$([A-Z])/, '$1');
-}
-
-/**
- * [at description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function at(e) {
-    const r = st(e);
-    let t = 0;
-    let a = 0;
-    for (; a !== r.length; ++a) t = 26 * t + r.charCodeAt(a) - 64;
-    return t - 1;
-}
-
-/**
- * [lt description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function lt(e) {
-    return e.replace(/(\$?[A-Z]*)(\$?\d*)/, '$1,$2').split(',');
-}
-
-/**
- * [tt description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function tt(e) {
-    return e.replace(/\$(\d+)$/, '$1');
-}
-
-/**
- * [qr description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function qr(e) {
-    return parseInt(tt(e), 10) - 1;
-}
-
-/**
- * [ft description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function ft(e) {
-    const r = lt(e);
-    return { c: at(r[0]), r: qr(r[1]) };
-}
-
-/**
- * [ct description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function ct(e) {
-    const r = e.split(':').map(ft);
-    return { s: r[0], e: r[r.length - 1] };
-}
-
-/**
- * [nt description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function nt(e) {
-    let r = '';
-    for (++e; e; e = Math.floor((e - 1) / 26)) r = String.fromCharCode(((e - 1) % 26) + 65) + r;
-    return r;
-}
-
-/**
- * [ot description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function ot(e) {
-    return nt(e.c) + et(e.r);
-}
-
-/**
- * [et description]
- * @param  {[type]} e [description]
- * @return {[type]}   [description]
- */
-function et(e) {
-    return `${e + 1}`;
-}
-
-/**
- * [ht description]
- * @param  {[type]} e [description]
- * @param  {[type]} r [description]
- * @return {[type]}   [description]
- */
-function ht(e, r) {
-    if (typeof r === 'undefined' || typeof r === 'number') {
-        return ht(e.s, e.e);
-    }
-    if (typeof e !== 'string') e = ot(e);
-    if (typeof r !== 'string') r = ot(r);
-    return e === r ? e : `${e}:${r}`;
-}
-/* eslint-enable */
-
-export const utils = {
-    decode_cell: ft,
-    decode_col: at,
-    decode_range: ct,
-    decode_row: qr,
-    encode_cell: ot,
-    encode_col: nt,
-    encode_range: ht,
-    encode_row: et
 };
