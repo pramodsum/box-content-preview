@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Tooltip from 'box-react-ui/lib/components/tooltip';
-import { ArrowKeyStepper, MultiGrid, AutoSizer } from 'react-virtualized';
+import { ArrowKeyStepper, MultiGrid, AutoSizer, ScrollSync } from 'react-virtualized';
 import Draggable from 'react-draggable';
 import Immutable from 'immutable';
 import { Parser as HtmlToReactParser } from 'html-to-react';
@@ -515,60 +515,75 @@ class Sheet extends Component {
         } = this.state;
 
         return (
-            <div style={{ position: 'relative', height: '100%' }}>
-                <AutoSizer>
-                    {({ width, height }) => (
-                        <ArrowKeyStepper
-                            mode='cells'
-                            rowCount={rowCount}
-                            columnCount={columnCount}
-                            isControlled
-                            onScrollToChange={this._selectCell}
-                            scrollToRow={scrollToRow}
-                            scrollToColumn={scrollToColumn}
-                        >
-                            {({ onSectionRendered }) => (
-                                <MultiGrid
-                                    ref={(ref) => {
-                                        this._grid = ref;
-                                    }}
-                                    enableFixedColumnScroll
-                                    enableFixedRowScroll
-                                    fixedColumnCount={1}
-                                    fixedRowCount={1}
-                                    columnWidth={({ index }) => this._getColumnWidth(index - 1)}
-                                    estimatedColumnSize={columnWidth}
-                                    columnCount={columnCount}
-                                    rowHeight={({ index }) => this._getRowHeight(index - 1)}
-                                    estimatedRowSize={rowHeight}
-                                    rowCount={rowCount}
-                                    style={styles.grids}
-                                    styleTopLeftGrid={styles.topLeftGrid}
-                                    styleTopRightGrid={styles.topRightGrid}
-                                    styleBottomLeftGrid={styles.bottomLeftGrid}
-                                    width={width}
-                                    height={height}
-                                    hideTopRightGridScrollbar
-                                    hideBottomLeftGridScrollbar
-                                    onSectionRendered={onSectionRendered}
-                                    scrollToColumn={scrollToColumn}
-                                    scrollToRow={scrollToRow}
-                                    cellRenderer={({ key, columnIndex, rowIndex, style }) =>
-                                        this._cellRenderer({
-                                            key,
-                                            columnIndex,
-                                            rowIndex,
-                                            scrollToColumn,
-                                            scrollToRow,
-                                            style
-                                        })
-                                    }
+            <div style={{ position: 'relative', height: 'calc(100% - 51px)' }}>
+                <ScrollSync>
+                    {({ onScroll, scrollLeft, scrollTop }) => (
+                        <div style={{ height: '100%' }}>
+                            {sheet['!charts'] && (
+                                <Charts
+                                    sheet={sheet}
+                                    zoom={zoom}
+                                    themeColors={themeColors}
+                                    scrollLeftOffset={scrollLeft}
+                                    scrollTopOffset={scrollTop}
                                 />
                             )}
-                        </ArrowKeyStepper>
+                            <AutoSizer>
+                                {({ width, height }) => (
+                                    <ArrowKeyStepper
+                                        mode='cells'
+                                        rowCount={rowCount}
+                                        columnCount={columnCount}
+                                        isControlled
+                                        onScrollToChange={this._selectCell}
+                                        scrollToRow={scrollToRow}
+                                        scrollToColumn={scrollToColumn}
+                                    >
+                                        {({ onSectionRendered }) => (
+                                            <MultiGrid
+                                                ref={(ref) => {
+                                                    this._grid = ref;
+                                                }}
+                                                onScroll={onScroll}
+                                                enableFixedColumnScroll
+                                                enableFixedRowScroll
+                                                fixedColumnCount={1}
+                                                fixedRowCount={1}
+                                                columnWidth={({ index }) => this._getColumnWidth(index - 1)}
+                                                estimatedColumnSize={columnWidth}
+                                                columnCount={columnCount}
+                                                rowHeight={({ index }) => this._getRowHeight(index - 1)}
+                                                estimatedRowSize={rowHeight}
+                                                rowCount={rowCount}
+                                                style={styles.grids}
+                                                styleTopLeftGrid={styles.topLeftGrid}
+                                                styleTopRightGrid={styles.topRightGrid}
+                                                styleBottomLeftGrid={styles.bottomLeftGrid}
+                                                width={width}
+                                                height={height}
+                                                hideTopRightGridScrollbar
+                                                hideBottomLeftGridScrollbar
+                                                onSectionRendered={onSectionRendered}
+                                                scrollToColumn={scrollToColumn}
+                                                scrollToRow={scrollToRow}
+                                                cellRenderer={({ key, columnIndex, rowIndex, style }) =>
+                                                    this._cellRenderer({
+                                                        key,
+                                                        columnIndex,
+                                                        rowIndex,
+                                                        scrollToColumn,
+                                                        scrollToRow,
+                                                        style
+                                                    })
+                                                }
+                                            />
+                                        )}
+                                    </ArrowKeyStepper>
+                                )}
+                            </AutoSizer>
+                        </div>
                     )}
-                </AutoSizer>
-                {sheet['!charts'] && <Charts sheet={sheet} zoom={zoom} themeColors={themeColors} />}
+                </ScrollSync>
             </div>
         );
     }

@@ -34,7 +34,10 @@ class Charts extends Component {
      */
     static propTypes = {
         sheet: PropTypes.object.isRequired,
-        themeColors: PropTypes.array.isRequired
+        zoom: PropTypes.number,
+        themeColors: PropTypes.array.isRequired,
+        scrollLeftOffset: PropTypes.number.isRequired,
+        scrollTopOffset: PropTypes.number.isRequired
     };
     /* eslint-enable */
 
@@ -192,20 +195,32 @@ class Charts extends Component {
      */
     render() {
         const { charts } = this.state;
+        const { scrollLeftOffset, scrollTopOffset } = this.props;
+
         /* eslint-disable */
         return (
-            <div style={{ width: '100%', position: 'absolute', top: 0, left: 0 }}>
+            <div
+                style={{
+                    width: `calc(100% - ${HEADER_WIDTH}px)`,
+                    height: `calc(100% - ${HEADER_HEIGHT}px)`,
+                    position: 'absolute',
+                    top: HEADER_HEIGHT,
+                    left: HEADER_WIDTH,
+                    overflow: 'hidden'
+                }}
+            >
                 {charts.map((chart, idx) => {
                     const ChartType = chartTypeMap[chart.type];
                     return (
                         <div
                             style={{
                                 position: 'absolute',
-                                left: chart.position.x + HEADER_WIDTH,
-                                top: chart.position.y + HEADER_HEIGHT,
+                                left: chart.position.x - scrollLeftOffset,
+                                top: chart.position.y - scrollTopOffset,
                                 height: chart.height,
                                 width: chart.width,
-                                backgroundColor: 'white'
+                                backgroundColor: 'white',
+                                zIndex: 1
                             }}
                             key={idx}
                         >
