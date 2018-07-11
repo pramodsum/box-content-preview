@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Bar, Pie, Doughnut } from 'react-chartjs-2';
 import PropTypes from 'prop-types';
-import { utils } from './utils';
 import { HEADER_WIDTH, HEADER_HEIGHT } from './const';
 
 /**
@@ -63,14 +62,15 @@ class Charts extends Component {
      * @return {Object}         labels and data of a subplot, and updated counter
      */
     _getRawData = (chart, subPlot, counter) => {
-        const { e } = utils.decode_range(chart['!ref']);
+        /* global XLSX */
+        const { e } = XLSX.utils.decode_range(chart['!ref']);
         const rowCount = e.r + 1;
         let subLabels = [];
         const subData = [];
         let newCounter = counter;
         subPlot.forEach((key) => {
             for (let r = 0; r < rowCount; ++r) {
-                const pos = utils.encode_cell({
+                const pos = XLSX.utils.encode_cell({
                     c: newCounter,
                     r
                 });

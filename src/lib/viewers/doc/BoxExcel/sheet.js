@@ -8,15 +8,7 @@ import PropTypes from 'prop-types';
 import c from './colors';
 import Charts from './charts';
 import { HEADER_WIDTH, HEADER_HEIGHT, COLUMN_WIDTH, ROW_HEIGHT } from './const';
-import {
-    _getVertAlign,
-    _getHoriAlign,
-    _parseColor,
-    _getBackgroundColor,
-    borderWidthMap,
-    dateConvertor,
-    utils
-} from './utils';
+import { _getVertAlign, _getHoriAlign, _parseColor, _getBackgroundColor, borderWidthMap, dateConvertor } from './utils';
 
 /**
  * React styles object, like css-in-js
@@ -351,12 +343,13 @@ class Sheet extends Component {
     /**
      * Get data object for a certain position
      *
-     * @param  {number} rowIndex    row index, 0 basis
-     * @param  {number} columnIndex col index, 0 basis
+     * @param  {number} rowIndex    row index, 1 basis
+     * @param  {number} columnIndex col index, 1 basis
      * @return {Object}             data object for the cell
      */
     _getCell = (rowIndex, columnIndex) => {
-        const pos = utils.encode_cell({
+        /* global XLSX */
+        const pos = XLSX.utils.encode_cell({
             r: rowIndex - 1,
             c: columnIndex - 1
         });
@@ -413,7 +406,8 @@ class Sheet extends Component {
         if (rowIndex === 0 && columnIndex === 0) {
             return '';
         } else if (rowIndex === 0) {
-            return utils.encode_col(columnIndex - 1);
+            /* global XLSX */
+            return XLSX.utils.encode_col(columnIndex - 1);
         } else if (columnIndex === 0) {
             return rowIndex;
         }
@@ -429,10 +423,10 @@ class Sheet extends Component {
      * Render single cell for at (rowIndex, columnIndex)
      *
      * @param  {any} key               cell key
-     * @param  {number} columnIndex    column index 0 basis, -1 means, header
-     * @param  {number} rowIndex       row index 0 basis, -1 means header
-     * @param  {number} scrollToColumn focused col index, 0 basis
-     * @param  {number} scrollToRow    focused row index, 0 basis
+     * @param  {number} columnIndex    column index 1 basis, 0 means header
+     * @param  {number} rowIndex       row index 1 basis, 0 means header
+     * @param  {number} scrollToColumn focused col index, 1 basis
+     * @param  {number} scrollToRow    focused row index, 1 basis
      * @param  {Object} style          React style object
      * @return {jsx}                   Rendered jsx
      */
