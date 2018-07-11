@@ -1,3 +1,8 @@
+/**
+ * Excel 2007/2010/2013 Indexed Colors
+ * https://github.com/ClosedXML/ClosedXML/wiki/Excel-Indexed-Colors
+ * @type {Object}
+ */
 export const specialIndexMap = {
     0: '#000000',
     1: '#FFFFFF',
@@ -66,6 +71,11 @@ export const specialIndexMap = {
     64: '#000000'
 };
 
+/**
+ * Older 56 Excel ColorIndex Colors
+ * http://dmcritchie.mvps.org/excel/colors.htm
+ * @type {Object}
+ */
 export const specialIndexMapOld = {
     1: '#000000',
     2: '#FFFFFF',
@@ -125,6 +135,10 @@ export const specialIndexMapOld = {
     56: '#333333'
 };
 
+/**
+ * box color scheme and excel color map
+ * @type {Object}
+ */
 const colors = {
     gridGrey: '#BDC3C7',
     backgroundGrey: '#F9F9F9',

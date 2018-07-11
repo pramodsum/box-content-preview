@@ -21,11 +21,8 @@ class Workbook extends PureComponent {
      */
     render() {
         const { workbook } = this.props;
-
         const wbSettings = workbook.Workbook;
-
         const nonHiddenSheetsNames = wbSettings.Sheets.filter((s) => s.Hidden === 0).map((s) => s.name);
-
         const colorScheme = workbook.Themes ? workbook.Themes.themeElements.clrScheme : [];
 
         return (

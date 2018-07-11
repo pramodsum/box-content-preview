@@ -1,6 +1,12 @@
 import moment from 'moment';
 import { specialIndexMap } from './colors';
 
+/**
+ * map dataFormat string from excel to moment
+ * need to add more in the future
+ *
+ * @type {Object}
+ */
 export const dateMap = {
     m: 'M',
     d: 'D',
@@ -9,10 +15,11 @@ export const dateMap = {
 };
 
 /**
- * [dateConvertor description]
- * @param  {string} rawDate   [description]
- * @param  {string} rawFormat [description]
- * @return {string}           [description]
+ * convert date to right format
+ *
+ * @param  {Date} rawDate     JS Date
+ * @param  {string} rawFormat Excel format
+ * @return {string}           Well Formatted Date
  */
 export function dateConvertor(rawDate, rawFormat) {
     const date = moment(rawDate);
@@ -21,9 +28,9 @@ export function dateConvertor(rawDate, rawFormat) {
 }
 
 /**
- * [_getVertAlign description]
+ *
+ *
  * @param       {[type]} align [description]
- * @constructor
  * @return      {[type]}       [description]
  */
 export function _getVertAlign(align) {
@@ -40,7 +47,6 @@ export function _getVertAlign(align) {
 /**
  * [_getHoriAlign description]
  * @param       {[type]} align [description]
- * @constructor
  * @return      {[type]}       [description]
  */
 export function _getHoriAlign(align) {
@@ -57,7 +63,6 @@ export function _getHoriAlign(align) {
 /**
  * [_parseColor description]
  * @param       {[type]} color [description]
- * @constructor
  * @return      {[type]}       [description]
  */
 export function _parseColor(color) {

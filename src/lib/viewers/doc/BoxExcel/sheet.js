@@ -20,6 +20,7 @@ import {
 
 /**
  * React styles object, like css-in-js
+ *
  * @type {Object}
  */
 const styles = {
@@ -94,6 +95,7 @@ class Sheet extends Component {
 
     /**
      * [constructor]
+     *
      * @param {Object} props React element properties, see above
      */
     constructor(props) {
@@ -119,7 +121,8 @@ class Sheet extends Component {
 
     /**
      * Before rendering, parse dimention, settings, and theme
-     * @return {[type]} [description]
+     *
+     * @return {void}
      */
     componentWillMount() {
         // console.log('start rendering', performance.now());
@@ -154,6 +157,7 @@ class Sheet extends Component {
 
     /**
      * Triggered when resizing row or column
+     *
      * @param  {Object} nextProps next property to change
      * @param  {Object} nextState next state to change
      * @return {void}
@@ -168,6 +172,7 @@ class Sheet extends Component {
 
     /**
      * Parse the theme colors, only need 'accent' for now
+     *
      * @param  {Array} theme Array of objects consisting of colors
      * @return {Array}       Array of hex color strings
      */
@@ -179,6 +184,7 @@ class Sheet extends Component {
      * Parse the settings of the spreadsheet
      * Currently, only get zoom ratio and girdlineVisibility,
      * In the future, we can parse more for high fidelity
+     *
      * @param  {Object} views View setting object
      * @return {Object}       zoom ratio and girdlineVisibility
      */
@@ -193,6 +199,7 @@ class Sheet extends Component {
     /**
      * Get row height of a certain index
      * Required for React-Virtualized
+     *
      * @param  {number} index index number, 0 basis. -1 means header
      * @return {number}       row height in px
      */
@@ -205,6 +212,7 @@ class Sheet extends Component {
     /**
      * Get column width for a certain index
      * Required for React-Virtualized
+     *
      * @param  {number} index index number, 0 basis. -1 means header
      * @return {number}       column width in px
      */
@@ -217,6 +225,7 @@ class Sheet extends Component {
     /**
      * Triggered when resizing row or column.
      * Calculate the new value and set in state
+     *
      * @param  {number}  delta       Diff between original and new value
      * @param  {numebr}  index       index number, 0 basis
      * @param  {boolean} isRowHeader true if is resizing row, false if column
@@ -244,6 +253,7 @@ class Sheet extends Component {
 
     /**
      * Helper function to check if a row or column is hidden (0 px)
+     *
      * @param  {number}  rowIndex    row index number, 0 basis
      * @param  {number}  columnIndex col index number, 0 basis
      * @return {boolean}             true if hidden, false if not
@@ -259,6 +269,7 @@ class Sheet extends Component {
      * special row height, special col width,
      * total row numbers, total col numbers,
      * and merged grids
+     *
      * @param  {Object} sheet spreadsheet data
      * @return {Object}       parsed data mentioned above
      */
@@ -271,7 +282,8 @@ class Sheet extends Component {
         let columnCount = 0;
 
         if (sheet['!ref']) {
-            const { e } = utils.decode_range(sheet['!ref']);
+            /* global XLSX */
+            const { e } = XLSX.utils.decode_range(sheet['!ref']);
             rowCount = e.r + 2;
             columnCount = e.c + 2;
         }
@@ -338,14 +350,15 @@ class Sheet extends Component {
 
     /**
      * Get data object for a certain position
+     *
      * @param  {number} rowIndex    row index, 0 basis
      * @param  {number} columnIndex col index, 0 basis
      * @return {Object}             data object for the cell
      */
     _getCell = (rowIndex, columnIndex) => {
         const pos = utils.encode_cell({
-            r: rowIndex,
-            c: columnIndex
+            r: rowIndex - 1,
+            c: columnIndex - 1
         });
         const { sheet } = this.state;
         return sheet[pos];
@@ -353,6 +366,7 @@ class Sheet extends Component {
 
     /**
      * Helper function of _getBorder
+     *
      * @param  {Object} style style property in a cell object
      * @return {string}       hex color string
      */
@@ -362,6 +376,7 @@ class Sheet extends Component {
 
     /**
      * Helper function of _getBorder
+     *
      * @param  {style} style style property in a cell object
      * @return {string}      border width string, default: '1px'
      */
@@ -371,6 +386,7 @@ class Sheet extends Component {
 
     /**
      * Get border style, including borderColor and borderWidth
+     *
      * @param  {Object} style style property in a cell object
      * @return {Object}       React style object
      */
@@ -388,9 +404,10 @@ class Sheet extends Component {
 
     /**
      * Get cell content
-     * @param  {[type]} rowIndex    [description]
-     * @param  {[type]} columnIndex [description]
-     * @return {[type]}             [description]
+     *
+     * @param  {number} rowIndex    row index, 1 basis, 0 is header
+     * @param  {number} columnIndex col index, 1 basis, 0 is header
+     * @return {string}             cell content
      */
     _getCellContent = (rowIndex, columnIndex) => {
         if (rowIndex === 0 && columnIndex === 0) {
@@ -410,7 +427,8 @@ class Sheet extends Component {
 
     /**
      * Render single cell for at (rowIndex, columnIndex)
-     * @param  {[type]} key            cell key
+     *
+     * @param  {any} key               cell key
      * @param  {number} columnIndex    column index 0 basis, -1 means, header
      * @param  {number} rowIndex       row index 0 basis, -1 means header
      * @param  {number} scrollToColumn focused col index, 0 basis
@@ -421,8 +439,8 @@ class Sheet extends Component {
     _cellRenderer = ({ key, columnIndex, rowIndex, scrollToColumn, scrollToRow, style }) => {
         const { merges, gridlines } = this.state;
         const cell = this._getCell(rowIndex, columnIndex);
-        const isRowHeader = columnIndex === -1;
-        const isColHeader = rowIndex === -1;
+        const isRowHeader = columnIndex === 0;
+        const isColHeader = rowIndex === 0;
         const isHeader = isRowHeader || isColHeader;
         const isFocus = columnIndex === scrollToColumn && rowIndex === scrollToRow;
         const fontColor = cell && cell.s && cell.s.color ? `#${cell.s.color.rgb}` : '#000000';
@@ -443,7 +461,7 @@ class Sheet extends Component {
                         : _getBackgroundColor(cell.s.fgColor.indexed, fontColor)
                 }
                 : {};
-        cellBgColor = cell ? { backgroundColor: 'white' } : {};
+        if (Object.keys(cellBgColor).length === 0) cellBgColor = cell ? { backgroundColor: 'white' } : {};
         const cellBorder = cell && cell.s && this._getBorder(cell.s);
         const cellHidden = this._isHidden(rowIndex - 1, columnIndex - 1)
             ? { overflow: 'hidden', borderWidth: 0, padding: 0 }
@@ -558,10 +576,22 @@ class Sheet extends Component {
         /* eslint-enable */
     };
 
+    /**
+     * record focused cell position
+     *
+     * @param  {number} scrollToColumn column index, 0 is header
+     * @param  {number} scrollToRow    row index, 0 is header
+     * @return {void}
+     */
     _selectCell = ({ scrollToColumn, scrollToRow }) => {
         this.setState({ scrollToColumn, scrollToRow });
     };
 
+    /**
+     * Render sheet
+     *
+     * @return {jsx} Rendered jsx
+     */
     render() {
         const {
             sheet,
@@ -617,11 +647,10 @@ class Sheet extends Component {
                                     cellRenderer={({ key, columnIndex, rowIndex, style }) =>
                                         this._cellRenderer({
                                             key,
-                                            // -1 to convert from 1 basis to 0 basis
-                                            columnIndex: columnIndex - 1,
-                                            rowIndex: rowIndex - 1,
-                                            scrollToColumn: scrollToColumn - 1,
-                                            scrollToRow: scrollToRow - 1,
+                                            columnIndex,
+                                            rowIndex,
+                                            scrollToColumn,
+                                            scrollToRow,
                                             style
                                         })
                                     }
