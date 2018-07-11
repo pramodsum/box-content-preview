@@ -1,6 +1,7 @@
 /**
  * Excel 2007/2010/2013 Indexed Colors
  * https://github.com/ClosedXML/ClosedXML/wiki/Excel-Indexed-Colors
+ *
  * @type {Object}
  */
 export const specialIndexMap = {
@@ -74,6 +75,7 @@ export const specialIndexMap = {
 /**
  * Older 56 Excel ColorIndex Colors
  * http://dmcritchie.mvps.org/excel/colors.htm
+ *
  * @type {Object}
  */
 export const specialIndexMapOld = {
@@ -137,6 +139,7 @@ export const specialIndexMapOld = {
 
 /**
  * box color scheme and excel color map
+ *
  * @type {Object}
  */
 const colors = {
