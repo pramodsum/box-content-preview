@@ -6,70 +6,10 @@ import Immutable from 'immutable';
 import { Parser as HtmlToReactParser } from 'html-to-react';
 import PropTypes from 'prop-types';
 import c from './colors';
+import styles from './sheetStyles';
 import Charts from './charts';
 import { HEADER_WIDTH, HEADER_HEIGHT, COLUMN_WIDTH, ROW_HEIGHT } from './const';
 import { _getVertAlign, _getHoriAlign, _parseColor, _getBackgroundColor, borderWidthMap, dateConvertor } from './utils';
-
-/**
- * React styles object, like css-in-js
- *
- * @type {Object}
- */
-const styles = {
-    grids: {
-        borderWidth: '1px 0 0 1px',
-        borderColor: c.gridGrey,
-        borderStyle: 'solid'
-    },
-    topLeftGrid: {
-        borderBottom: `1px solid ${c.gridGrey}`,
-        borderRight: `1px solid ${c.gridGrey}`
-    },
-    headerGrid: {
-        borderBottom: `1px solid ${c.gridGrey}`,
-        backgroundColor: c.backgroundGrey
-    },
-    bottomLeftGrid: {
-        borderRight: `1px solid ${c.gridGrey}`,
-        backgroundColor: c.backgroundGrey
-    },
-    Cell: {
-        padding: '2px 1px 1px 2px',
-        borderWidth: '0 1px 1px 0',
-        borderStyle: 'solid',
-        borderColor: c.gridGrey,
-        fontSize: 12,
-        float: 'leftbottom',
-        boxSizing: 'border-box',
-        lineHeight: 'normal'
-    },
-    headerBorder: {
-        borderWidth: '0 1px 1px 0',
-        borderStyle: 'solid',
-        borderColor: c.gridGrey
-    },
-    FocusedCell: {
-        borderWidth: 2,
-        padding: 0,
-        borderColor: c.gridGreen
-    },
-    cellDiv: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        justifyContent: 'flex-start',
-        textAlign: 'left',
-        whiteSpace: 'nowrap',
-        height: '100%',
-        width: '100%'
-    },
-    headerAlign: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden'
-    },
-    focusedDiv: {}
-};
 
 class Sheet extends Component {
     /* eslint-disable */
@@ -482,14 +422,7 @@ class Sheet extends Component {
         const divContent = (
             <div
                 className={commentHtml && 'divComment'}
-                style={Object.assign(
-                    {},
-                    styles.cellDiv,
-                    divNumber,
-                    isHeader && styles.headerAlign,
-                    isFocus && styles.focusedDiv,
-                    divAlign
-                )}
+                style={Object.assign({}, styles.cellDiv, divNumber, isHeader && styles.headerAlign, divAlign)}
             >
                 {this._getCellContent(rowIndex, columnIndex)}
             </div>
@@ -544,25 +477,7 @@ class Sheet extends Component {
                         }}
                         zIndex={999}
                     >
-                        <div
-                            style={
-                                isRowHeader
-                                    ? {
-                                          width: '100%',
-                                          height: 3,
-                                          position: 'absolute',
-                                          bottom: -2,
-                                          right: 0
-                                      }
-                                    : {
-                                          width: 3,
-                                          height: '100%',
-                                          position: 'absolute',
-                                          top: 0,
-                                          right: -2
-                                      }
-                            }
-                        />
+                        <div style={isRowHeader ? styles.rowHeader : styles.colHeader} />
                     </Draggable>
                 )}
             </div>
