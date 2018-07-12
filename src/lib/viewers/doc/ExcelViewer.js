@@ -22,6 +22,11 @@ class ExcelViewer extends BaseViewer {
         super.setup();
 
         this.excelEl = this.containerEl.appendChild(document.createElement('div'));
+
+        // disable zooming until zooming handler is implemented
+        document.addEventListener('gesturestart', (event) => {
+            event.preventDefault();
+        });
     }
 
     /**
@@ -66,7 +71,6 @@ class ExcelViewer extends BaseViewer {
 
         const { representation } = this.options;
         const template = representation.content.url_template;
-
         return Promise.all([this.loadAssets(JS), this.getRepStatus().getPromise()])
             .then(() => {
                 get(this.createContentUrlWithAuthParams(template), 'blob').then((excelBlob) => {
