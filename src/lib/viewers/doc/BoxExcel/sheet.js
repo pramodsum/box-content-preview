@@ -220,6 +220,22 @@ class Sheet extends Component {
             columnCount = e.c + 2;
         }
 
+        if (sheet['!charts']) {
+            let maxX = 0;
+            let maxY = 0;
+            sheet['!charts'].forEach((chart) => {
+                const position = chart['!pos'];
+                const x = position.x + position.w;
+                const y = position.y + position.h;
+                maxX = x > maxX ? x : maxX;
+                maxY = y > maxY ? y : maxY;
+            });
+            const chartsRowCount = Math.ceil(maxY / ROW_HEIGHT) + 1;
+            const chartsColumnCount = Math.ceil(maxX / COLUMN_WIDTH) + 1;
+            rowCount = chartsRowCount > rowCount ? chartsRowCount : rowCount;
+            columnCount = chartsColumnCount > columnCount ? chartsColumnCount : columnCount;
+        }
+
         if (sheet['!sheetFormat']) {
             const { col, row } = sheet['!sheetFormat'];
             rowHeight = row ? row.hpx : ROW_HEIGHT;
