@@ -8,11 +8,13 @@ class BoxExcel {
      *
      * @param {HTMLElement} excelEl - Excel element
      * @param {Object} data - Excel data parsed by sheetjs
+     * @param {Object} controls - Controls
      * @return {BoxExcel} Instance
      */
-    constructor(excelEl, data) {
+    constructor(excelEl, data, controls) {
         this.excelEl = excelEl;
         this.data = data;
+        this.controls = controls;
 
         this.excelEl.className = 'bp-excel-container';
     }
@@ -36,7 +38,7 @@ class BoxExcel {
      * @private
      */
     renderExcel() {
-        this.gridComponent = render(<Workbook workbook={this.data} />, this.excelEl);
+        this.gridComponent = render(<Workbook workbook={this.data} control={this.controls} />, this.excelEl);
     }
 }
 

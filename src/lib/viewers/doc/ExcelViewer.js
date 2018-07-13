@@ -24,9 +24,7 @@ class ExcelViewer extends BaseViewer {
         this.excelEl = this.containerEl.appendChild(document.createElement('div'));
 
         // disable zooming until zooming handler is implemented
-        document.addEventListener('gesturestart', (event) => {
-            event.preventDefault();
-        });
+        this.excelEl.addEventListener('touchstart', this.disableTouch);
     }
 
     /**
@@ -38,7 +36,16 @@ class ExcelViewer extends BaseViewer {
         if (this.excelComponent) {
             this.excelComponent.destroy();
         }
+        this.excelEl.removeEventListener('touchstart', this.disableTouch);
         super.destroy();
+    }
+
+    disableTouch(event) {
+        if (event.touches.length < 2) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     /**
@@ -160,7 +167,7 @@ class ExcelViewer extends BaseViewer {
      */
     finishLoading() {
         /* global BoxExcel */
-        this.excelComponent = new BoxExcel(this.excelEl, this.data);
+        this.excelComponent = new BoxExcel(this.excelEl, this.data, this.controls);
         this.excelComponent.renderExcel();
 
         this.loadUI();

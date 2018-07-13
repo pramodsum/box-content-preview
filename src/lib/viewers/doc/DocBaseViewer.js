@@ -1126,7 +1126,7 @@ class DocBaseViewer extends BaseViewer {
             scale < MIN_PINCH_SCALE_VALUE
         ) {
             // There are a variety of circumstances where we don't want to scale'
-            // 1. We haven't detected a changes
+            // 1. We haven't detected a change
             // 2. The change isn't significant enough
             // 3. We will exceed our max or min scale
             // 4. The scale is too significant, which can lead to performance issues

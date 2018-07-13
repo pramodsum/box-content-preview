@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import c from './colors';
 import styles from './sheetStyles';
 import Charts from './charts';
-import { HEADER_WIDTH, HEADER_HEIGHT, COLUMN_WIDTH, ROW_HEIGHT } from './const';
+import { HEADER_WIDTH, HEADER_HEIGHT, COLUMN_WIDTH, ROW_HEIGHT, DEFAULT_FONT_SIZE } from './const';
 import { _getVertAlign, _getHoriAlign, _parseColor, _getBackgroundColor, borderWidthMap, dateConvertor } from './utils';
 
 class Sheet extends Component {
@@ -46,6 +46,7 @@ class Sheet extends Component {
             rowHeights: Immutable.Map(),
             merges: {},
             zoom: 1.0,
+            zoomBase: 1.0,
             gridlines: true,
             themeColors: []
         };
@@ -82,9 +83,15 @@ class Sheet extends Component {
             columnWidths,
             merges,
             zoom,
+            zoomBase: zoom,
             gridlines,
             themeColors
         });
+    }
+
+    componentDidMount() {
+        document.addEventListener('touchmove', this.pinchToZoom);
+        document.addEventListener('touchend', this.pinchToZoomEnd);
     }
 
     /**
@@ -101,6 +108,25 @@ class Sheet extends Component {
             this._grid.recomputeGridSize();
         }
     }
+
+    componentWillUnmount() {
+        document.removeEventListener('touchmove', this.zoom);
+    }
+
+    pinchToZoom = (event) => {
+        const { zoomBase } = this.state;
+        this.setState({
+            zoom: zoomBase * event.scale
+        });
+        this._grid.recomputeGridSize();
+    };
+
+    pinchToZoomEnd = () => {
+        const { zoom } = this.state;
+        this.setState({
+            zoomBase: zoom
+        });
+    };
 
     /**
      * Parse the theme colors, only need 'accent' for now
@@ -136,9 +162,9 @@ class Sheet extends Component {
      * @return {number}       row height in px
      */
     _getRowHeight = (index) => {
-        if (index === -1) return HEADER_HEIGHT;
-        const { rowHeights, rowHeight } = this.state;
-        return rowHeights.get(index, rowHeight);
+        const { rowHeights, rowHeight, zoom } = this.state;
+        if (index === -1) return HEADER_HEIGHT * zoom;
+        return rowHeights.get(index, rowHeight) * zoom;
     };
 
     /**
@@ -149,9 +175,9 @@ class Sheet extends Component {
      * @return {number}       column width in px
      */
     _getColumnWidth = (index) => {
-        if (index === -1) return HEADER_WIDTH;
-        const { columnWidths, columnWidth } = this.state;
-        return columnWidths.get(index, columnWidth);
+        const { columnWidths, columnWidth, zoom } = this.state;
+        if (index === -1) return HEADER_WIDTH * zoom;
+        return columnWidths.get(index, columnWidth) * zoom;
     };
 
     /**
@@ -387,7 +413,7 @@ class Sheet extends Component {
      * @return {jsx}                   Rendered jsx
      */
     _cellRenderer = ({ key, columnIndex, rowIndex, scrollToColumn, scrollToRow, style }) => {
-        const { merges, gridlines } = this.state;
+        const { merges, gridlines, zoom } = this.state;
         const cell = this._getCell(rowIndex, columnIndex);
         const isRowHeader = columnIndex === 0;
         const isColHeader = rowIndex === 0;
@@ -397,12 +423,12 @@ class Sheet extends Component {
         const cellStyle =
             cell && cell.s
                 ? {
-                    fontSize: cell.s.sz,
+                    fontSize: cell.s.sz * zoom,
                     color: fontColor,
                     fontFamily: cell.s.name,
                     fontWeight: cell.s.bold ? 'bold' : 'normal'
                 }
-                : {};
+                : { fontSize: DEFAULT_FONT_SIZE * zoom };
         let cellBgColor =
             cell && cell.s && cell.s.fgColor && cell.s.patternType
                 ? {
