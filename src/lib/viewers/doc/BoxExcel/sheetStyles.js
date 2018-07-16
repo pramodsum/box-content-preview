@@ -9,7 +9,8 @@ const styles = {
     grids: {
         borderWidth: '1px 0 0 1px',
         borderColor: c.gridGrey,
-        borderStyle: 'solid'
+        borderStyle: 'solid',
+        transformOrigin: '0px 0px'
     },
     topLeftGrid: {
         borderBottom: `1px solid ${c.gridGrey}`,

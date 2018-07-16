@@ -58,7 +58,6 @@ class Sheet extends Component {
      * @return {void}
      */
     componentWillMount() {
-        // console.log('start rendering', performance.now());
         const { sheet, views, theme } = this.props;
         const {
             rowCount,
@@ -110,22 +109,29 @@ class Sheet extends Component {
     }
 
     componentWillUnmount() {
-        document.removeEventListener('touchmove', this.zoom);
+        document.removeEventListener('touchmove', this.pinchToZoom);
+        document.removeEventListener('touchend', this.pinchToZoomEnd);
     }
 
     pinchToZoom = (event) => {
-        const { zoomBase } = this.state;
-        this.setState({
-            zoom: zoomBase * event.scale
-        });
-        this._grid.recomputeGridSize();
+        const { columnWidth, columnWidths } = this.state;
+
+        if (columnWidths.get(0, columnWidth) < columnWidth * 10 && event.scale < 3) {
+            this.setState({
+                zoom: event.scale
+            });
+        }
     };
 
     pinchToZoomEnd = () => {
-        const { zoom } = this.state;
-        this.setState({
-            zoomBase: zoom
-        });
+        const { zoom, zoomBase } = this.state;
+        if (zoom !== 1.0) {
+            this.setState({
+                zoomBase: zoomBase * zoom,
+                zoom: 1.0
+            });
+            this._grid.recomputeGridSize();
+        }
     };
 
     /**
@@ -162,9 +168,9 @@ class Sheet extends Component {
      * @return {number}       row height in px
      */
     _getRowHeight = (index) => {
-        const { rowHeights, rowHeight, zoom } = this.state;
-        if (index === -1) return HEADER_HEIGHT * zoom;
-        return rowHeights.get(index, rowHeight) * zoom;
+        const { rowHeights, rowHeight, zoomBase } = this.state;
+        if (index === -1) return HEADER_HEIGHT * zoomBase;
+        return rowHeights.get(index, rowHeight) * zoomBase;
     };
 
     /**
@@ -175,9 +181,9 @@ class Sheet extends Component {
      * @return {number}       column width in px
      */
     _getColumnWidth = (index) => {
-        const { columnWidths, columnWidth, zoom } = this.state;
-        if (index === -1) return HEADER_WIDTH * zoom;
-        return columnWidths.get(index, columnWidth) * zoom;
+        const { columnWidths, columnWidth, zoomBase } = this.state;
+        if (index === -1) return HEADER_WIDTH * zoomBase;
+        return columnWidths.get(index, columnWidth) * zoomBase;
     };
 
     /**
@@ -413,7 +419,7 @@ class Sheet extends Component {
      * @return {jsx}                   Rendered jsx
      */
     _cellRenderer = ({ key, columnIndex, rowIndex, scrollToColumn, scrollToRow, style }) => {
-        const { merges, gridlines, zoom } = this.state;
+        const { merges, gridlines, zoomBase } = this.state;
         const cell = this._getCell(rowIndex, columnIndex);
         const isRowHeader = columnIndex === 0;
         const isColHeader = rowIndex === 0;
@@ -423,12 +429,12 @@ class Sheet extends Component {
         const cellStyle =
             cell && cell.s
                 ? {
-                    fontSize: cell.s.sz * zoom,
+                    fontSize: cell.s.sz * zoomBase,
                     color: fontColor,
                     fontFamily: cell.s.name,
                     fontWeight: cell.s.bold ? 'bold' : 'normal'
                 }
-                : { fontSize: DEFAULT_FONT_SIZE * zoom };
+                : { fontSize: DEFAULT_FONT_SIZE * zoomBase };
         let cellBgColor =
             cell && cell.s && cell.s.fgColor && cell.s.patternType
                 ? {
@@ -597,7 +603,7 @@ class Sheet extends Component {
                                                 rowHeight={({ index }) => this._getRowHeight(index - 1)}
                                                 estimatedRowSize={rowHeight}
                                                 rowCount={rowCount}
-                                                style={styles.grids}
+                                                style={{ ...styles.grids, transform: `scale(${zoom})` }}
                                                 styleTopLeftGrid={styles.topLeftGrid}
                                                 styleTopRightGrid={styles.topRightGrid}
                                                 styleBottomLeftGrid={styles.bottomLeftGrid}
