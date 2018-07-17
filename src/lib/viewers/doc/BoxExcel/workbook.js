@@ -47,7 +47,9 @@ class Workbook extends Component {
     render() {
         const { workbook } = this.props;
         const wbSettings = workbook.Workbook;
-        const nonHiddenSheetsNames = wbSettings.Sheets.filter((s) => s.Hidden === 0).map((s) => s.name);
+        const nonHiddenSheetsNames = wbSettings
+            ? wbSettings.Sheets.filter((s) => s.Hidden === 0).map((s) => s.name)
+            : workbook.SheetNames;
         const colorScheme = workbook.Themes ? workbook.Themes.themeElements.clrScheme : [];
 
         return (
@@ -60,7 +62,7 @@ class Workbook extends Component {
                                     this.sheets.push(ref);
                                 }}
                                 sheet={workbook.Sheets[name]}
-                                views={wbSettings.Views}
+                                views={wbSettings ? wbSettings.Views : null}
                                 theme={colorScheme}
                             />
                         </Tab>

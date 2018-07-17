@@ -11,9 +11,9 @@ import OfficeLoader from './viewers/office/OfficeLoader';
 
 // Order in this list matters
 export default [
+    DocLoader, // should come after text
     TextLoader, // should come before document
     OfficeLoader, // should come before document
-    DocLoader, // should come after text
     SWFLoader,
     Video360Loader,
     MediaLoader,

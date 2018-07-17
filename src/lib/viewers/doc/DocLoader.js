@@ -16,7 +16,7 @@ const VIEWERS = [
         NAME: 'Excel',
         CONSTRUCTOR: ExcelViewer,
         REP: ORIGINAL_REP_NAME,
-        EXT: ['xlsx', 'xls', 'xlsb', 'xlsm']
+        EXT: ['xlsx', 'xls', 'xlsb', 'xlsm', 'csv']
     },
     {
         NAME: 'Presentation',

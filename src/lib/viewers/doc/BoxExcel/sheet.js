@@ -161,6 +161,12 @@ class Sheet extends Component {
      * @return {Object}       zoom ratio and girdlineVisibility
      */
     _parseSettings = (views) => {
+        if (!views) {
+            return {
+                zoom: 1.0,
+                gridlines: true
+            };
+        }
         const view = views[0];
         return {
             zoom: view.zoom ? view.zoom / 100.0 : 1.0,
