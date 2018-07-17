@@ -15,7 +15,6 @@ class BoxExcel {
         this.excelEl = excelEl;
         this.data = data;
         this.controls = controls;
-
         this.excelEl.className = 'bp-excel-container';
     }
 
@@ -38,7 +37,7 @@ class BoxExcel {
      * @private
      */
     renderExcel() {
-        this.gridComponent = render(<Workbook workbook={this.data} control={this.controls} />, this.excelEl);
+        this.gridComponent = render(<Workbook workbook={this.data} controls={this.controls} />, this.excelEl);
     }
 }
 

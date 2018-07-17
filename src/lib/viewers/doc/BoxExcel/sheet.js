@@ -89,8 +89,8 @@ class Sheet extends Component {
     }
 
     componentDidMount() {
-        document.addEventListener('touchmove', this.pinchToZoom);
-        document.addEventListener('touchend', this.pinchToZoomEnd);
+        document.addEventListener('touchmove', this._pinchToZoom);
+        document.addEventListener('touchend', this._pinchToZoomEnd);
     }
 
     /**
@@ -109,11 +109,19 @@ class Sheet extends Component {
     }
 
     componentWillUnmount() {
-        document.removeEventListener('touchmove', this.pinchToZoom);
-        document.removeEventListener('touchend', this.pinchToZoomEnd);
+        document.removeEventListener('touchmove', this._pinchToZoom);
+        document.removeEventListener('touchend', this._pinchToZoomEnd);
     }
 
-    pinchToZoom = (event) => {
+    _zoom = (ratio) => {
+        const { zoomBase } = this.state;
+        this.setState({
+            zoomBase: zoomBase * ratio
+        });
+        this._grid.recomputeGridSize();
+    };
+
+    _pinchToZoom = (event) => {
         const { columnWidth, columnWidths } = this.state;
 
         if (columnWidths.get(0, columnWidth) < columnWidth * 10 && event.scale < 3) {
@@ -123,7 +131,7 @@ class Sheet extends Component {
         }
     };
 
-    pinchToZoomEnd = () => {
+    _pinchToZoomEnd = () => {
         const { zoom, zoomBase } = this.state;
         if (zoom !== 1.0) {
             this.setState({

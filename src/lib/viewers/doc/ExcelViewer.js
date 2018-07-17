@@ -13,6 +13,8 @@ const JS = [
     'excel.js'
 ];
 
+const CSS = ['excel.css'];
+
 class ExcelViewer extends BaseViewer {
     /**
      * @inheritdoc
@@ -78,7 +80,7 @@ class ExcelViewer extends BaseViewer {
 
         const { representation } = this.options;
         const template = representation.content.url_template;
-        return Promise.all([this.loadAssets(JS), this.getRepStatus().getPromise()])
+        return Promise.all([this.loadAssets(JS, CSS), this.getRepStatus().getPromise()])
             .then(() => {
                 get(this.createContentUrlWithAuthParams(template), 'blob').then((excelBlob) => {
                     this.startLoadTimer();
@@ -166,11 +168,12 @@ class ExcelViewer extends BaseViewer {
      * @return {void}
      */
     finishLoading() {
+        this.loadUI();
+
         /* global BoxExcel */
         this.excelComponent = new BoxExcel(this.excelEl, this.data, this.controls);
         this.excelComponent.renderExcel();
 
-        this.loadUI();
         this.loaded = true;
         this.emit(VIEWER_EVENT.load);
     }
