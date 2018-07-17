@@ -611,7 +611,10 @@ class Sheet extends Component {
                                                 rowHeight={({ index }) => this._getRowHeight(index - 1)}
                                                 estimatedRowSize={rowHeight}
                                                 rowCount={rowCount}
-                                                style={{ ...styles.grids, transform: `scale(${zoom})` }}
+                                                style={{
+                                                    ...styles.grids,
+                                                    transform: `scale(${zoom})`
+                                                }}
                                                 styleTopLeftGrid={styles.topLeftGrid}
                                                 styleTopRightGrid={styles.topRightGrid}
                                                 styleBottomLeftGrid={styles.bottomLeftGrid}
