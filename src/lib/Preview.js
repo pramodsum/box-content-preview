@@ -1163,6 +1163,7 @@ class Preview extends EventEmitter {
         this.viewer.addListener('error', this.triggerError);
         this.viewer.addListener(VIEWER_EVENT.default, this.handleViewerEvents);
         this.viewer.addListener(VIEWER_EVENT.metric, this.handleViewerMetrics);
+        this.viewer.addListener('annotations_metric', this.emit);
     }
 
     /**

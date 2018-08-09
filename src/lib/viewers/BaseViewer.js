@@ -59,6 +59,7 @@ const ANNOTATION_BUTTONS = {
         selector: SELECTOR_BOX_PREVIEW_BTN_ANNOTATE_DRAW
     }
 };
+const ANNOTATIONS_METRIC = 'annotations_metric';
 const ANNOTATOR_EVENT = {
     modeEnter: 'annotationmodeenter',
     modeExit: 'annotationmodeexit',
@@ -1002,6 +1003,9 @@ class BaseViewer extends EventEmitter {
                 if (data.data.mode === ANNOTATION_TYPE_DRAW) {
                     this.previewUI.replaceHeader(data.data.headerSelector);
                 }
+                break;
+            case ANNOTATOR_EVENT.metric:
+                this.emit(ANNOTATIONS_METRIC, data.data);
                 break;
             case ANNOTATOR_EVENT.error:
                 this.emit(VIEWER_EVENT.notificationShow, data.data);
