@@ -288,6 +288,7 @@ class DocBaseViewer extends BaseViewer {
      * @return {void}
      */
     handleAssetAndRepLoad() {
+        super.handleAssetAndRepLoad();
         this.setupPdfjs();
         this.initViewer(this.pdfUrl);
         this.initPrint();

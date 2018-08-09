@@ -131,6 +131,7 @@ class BaseViewer extends EventEmitter {
         this.resetLoadTimeout = this.resetLoadTimeout.bind(this);
         this.preventDefault = this.preventDefault.bind(this);
         this.debouncedResizeHandler = this.getResizeHandler().bind(this);
+        this.handleAssetAndRepLoad = this.handleAssetAndRepLoad.bind(this);
         this.handleAssetError = this.handleAssetError.bind(this);
         this.toggleFullscreen = this.toggleFullscreen.bind(this);
         this.onFullscreenToggled = this.onFullscreenToggled.bind(this);
@@ -289,6 +290,17 @@ class BaseViewer extends EventEmitter {
     startLoadTimer() {
         const tag = Timer.createTag(this.options.file.id, LOAD_METRIC.fullDocumentLoadTime);
         Timer.start(tag);
+    }
+
+    /**
+     * Loads a document after assets and representation are ready.
+     *
+     * @return {void}
+     */
+    handleAssetAndRepLoad() {
+        if (this.annotationsLoadPromise) {
+            this.annotationsLoadPromise.then(this.annotationsLoadHandler).catch(() => {});
+        }
     }
 
     /**
@@ -482,8 +494,8 @@ class BaseViewer extends EventEmitter {
             this.scale = event.scale;
         }
 
-        if (this.annotationsLoadPromise) {
-            this.annotationsLoadPromise.then(this.annotationsLoadHandler).catch(() => {});
+        if (this.annotatorConf) {
+            this.initAnnotations();
         }
     }
 
@@ -859,10 +871,6 @@ class BaseViewer extends EventEmitter {
 
         const boxAnnotations = this.options.boxAnnotations || new global.BoxAnnotations(viewerOptions);
         this.annotatorConf = boxAnnotations.determineAnnotator(this.options, this.viewerConfig);
-
-        if (this.annotatorConf) {
-            this.initAnnotations();
-        }
     }
 
     /**
@@ -1005,12 +1013,6 @@ class BaseViewer extends EventEmitter {
                 break;
             case ANNOTATOR_EVENT.error:
                 this.emit(VIEWER_EVENT.notificationShow, data.data);
-                break;
-            case ANNOTATOR_EVENT.fetch:
-                this.emit('scale', {
-                    scale: this.scale,
-                    rotationAngle: this.rotationAngle
-                });
                 break;
             default:
         }
